@@ -38,7 +38,6 @@ def initiate_handler():
     redirect_url = body.get('callback_url')
     public_key = body.get('public_key')
     resend = body.get('resend')
-    # verification_code = randint(100000, 999999)
     letters = string.ascii_uppercase + string.ascii_lowercase + string.ascii_letters
     verification_code = ''.join(choice(letters) for i in range(randint(64, 128)))
     user = db.getUserByName(conn, user_id)
