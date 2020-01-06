@@ -1,0 +1,99 @@
+# openKyc service
+
+## Usage
+
+### Add a new user
+
+**Definition**
+
+'POST /users'
+
+**Arguments**
+
+- '"user_id":string' id of the user
+- '"email":string' email of the user
+- '"callback_url":string' The url to where the user will be redirected when verifying the email address 
+- '"public_key":string' A base64 encoded curve ed25519 public key of the user
+
+**Response**
+
+- '200 ok' on success
+
+```
+Mail sent
+```
+
+### Verify email
+
+**Definition**
+
+'POST /users/\<userid\>/verify'
+
+**Arguments**
+
+- '"userid":string' id of the user
+- '"verification_code":string' The code got via email
+
+**Response**
+
+- '200 Ok' on success
+Email will be signed with the server's private key
+```json
+{
+    "user_id": "sara.vermeire",
+    "email": "sara.vermeire@gmail.com", 
+    "signature": "dcvasdfesdfbsadfewsadbhgfdsegadfvadsf", 
+    "verified": 1
+}
+```
+
+- '403 Forbidden' on code not matching stored code
+```
+VerificationCode not ok
+```
+
+### Get emailaddress & verification status
+In order to get the email and verification status of this user a signed message is needed.
+
+**Definition**
+
+'GET /users\<userid\>'
+
+**Arguments**
+
+- '"userid":string' id of the user
+
+**Response**
+
+- '200 Ok' on success
+The emailaddress of the user will be encrypted with the user's public key
+```json
+{
+    "user_id": "sara.vermeire",
+    "email": "dcvasdfesdfbsadfewsadbhgfdsegadfvadsf",
+    "verified": 1
+}
+```
+
+- '403 Forbidden' on code not matching stored code
+```
+VerificationCode not ok
+```
+
+### Development
+Setup
+```bash
+python3 -m venv py_env
+pip install -r requirements.txt
+```
+Run
+```bash
+export FLASK_APP=openkyc.py
+flask run --reload --debugger -p 5005
+```
+
+### Deploy
+```
+export PASSWORD=<insert password>
+gunicorn -b localhost:5005 -w 1 kyc:app
+```

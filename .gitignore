@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.db
+py_env/
+.vscode/
+kyc/config_production.py
