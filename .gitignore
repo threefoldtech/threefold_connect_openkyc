@@ -3,4 +3,3 @@ __pycache__/
 *.db
 py_env/
 .vscode/
-kyc/config_production.py
