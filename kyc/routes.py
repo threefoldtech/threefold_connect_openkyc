@@ -1,4 +1,4 @@
-from kyc import app, signing_key, nacl, db, conn, config, send_email
+from kyc import app, signing_key, nacl, db, conn, send_email
 from flask_cors import CORS
 from flask import Flask, Response, request, json
 from datetime import datetime, timedelta
@@ -6,6 +6,7 @@ from random import *
 import os
 import string
 import markdown
+import kyc.config as config
 import time
 import base64
 import hashlib
