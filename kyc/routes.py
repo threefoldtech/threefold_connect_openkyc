@@ -11,7 +11,6 @@ import base64
 import hashlib
 import logging
 
-# Disables the default spamm logging that's caused by flask/socketio.
 logging.getLogger("werkzeug").setLevel(level=logging.ERROR)
 
 logger = logging.getLogger(__name__)
@@ -23,19 +22,14 @@ handler.setFormatter(formatter)
 
 logger.addHandler(handler)
 
-@app.route("/")
-def index():
-    with open(os.path.dirname(app.root_path) + '/readme.md') as markdown_file:
-        content = markdown_file.read()
-        return markdown.markdown(content)
-
-@app.route("/users", methods=['POST'])
-def initiate_handler():
-    logger.debug("EMAIL!!!")
+@app.route("/verification/send-email", methods=['POST'])
+def verify_email_handler():
     body = request.get_json()
+    logger.debug('body %s', body)
+
     user_id = body.get('user_id').lower()
     email = body.get('email')
-    redirect_url = body.get('callback_url')
+    redirect_url = config.REDIRECT_URL
     public_key = body.get('public_key')
     resend = body.get('resend')
     letters = string.ascii_uppercase + string.ascii_lowercase + string.ascii_letters
@@ -71,14 +65,12 @@ def initiate_handler():
         logger.debug("Exception")
         return Response("Something went wrong", status=500)
 
-@app.route("/users/<userid>/verify", methods=['POST'])
-def verify_handler(userid):
+@app.route("/verification/verify-email", methods=['POST'])
+def verify_handler():
     body = request.get_json()
-    userid = userid.lower()
+    userid = body.get('user_id').lower()
     verification_code = body.get('verification_code')
     user = db.getUserByName(conn, userid)
-
-    # logger.debug("Attempting to verify user %s with verification_code %s", userid, verification_code)
 
     if user:
         if verification_code == user[2]:
@@ -86,13 +78,11 @@ def verify_handler(userid):
             signed_email_identifier = signing_key.sign(data, encoder=nacl.encoding.Base64Encoder)
         
             if signed_email_identifier: 
-                # Delete should only happen when the user has requested their signed (email/identifier). 
-                # db.delete_user(conn, user[0], user[1])
                 db.update_user(conn, "UPDATE users SET signed_email_identifier = ? WHERE user_id = ?", signed_email_identifier.decode("utf-8"), user[0])
                 logger.debug("Successfully verified userid %s", user[0])
                 return signed_email_identifier
             else:
-                return "Mhm, something went wrong."
+                return Response('Something went wrong.', status=403)
         else:
             logger.debug("Attempted to verify userid %s with an incorrect verification_code %s", userid, verification_code)
             return Response('Something went wrong.', status=403)
@@ -100,7 +90,7 @@ def verify_handler(userid):
         logger.debug("No open verifications found for userid %s", userid)
         return Response('Something went wrong.', status=403)
 
-@app.route("/users/<userid>", methods=['GET'])
+@app.route("/verification/retrieve-sei/<userid>", methods=['GET'])
 def get_signed_email_identifier_handler(userid):
     userid = userid.lower()
     user = db.getUserByName(conn, userid)
@@ -131,8 +121,6 @@ def get_signed_email_identifier_handler(userid):
                 mimetype='application/json'
             )
             
-            # Old account flow, won't delete account yet. 
-            # db.delete_user(conn, user[0], user[1])
             logger.debug("SEI: %s", sei)
             return response
 
@@ -142,10 +130,8 @@ def get_signed_email_identifier_handler(userid):
 
     if user[5]:
         logger.debug("We found an account: %s", user[0])
-
         logger.debug("Retrieved signed_email_identifier for %s", userid)
 
-        # If we follow the normal flow, it can be deleted. 
         db.delete_user(conn, user[0], user[1])
 
         data = {"signed_email_identifier": user[5]}
@@ -161,7 +147,7 @@ def get_signed_email_identifier_handler(userid):
     else:
         return Response("User not found in database.", status=404)
 
-@app.route("/publickey", methods=['GET'])
+@app.route("/verification/public-key", methods=['GET'])
 def public_key_handler():
     data = {"public_key": signing_key.verify_key.encode(encoder=nacl.encoding.Base64Encoder).decode("utf8")}
 
@@ -172,8 +158,7 @@ def public_key_handler():
 
     return response
 
-# A convenient verification function which will verify the signedEmailIdentifier the user sends us to see if we have signed it.
-@app.route("/verify", methods=['POST'])
+@app.route("/verification/verify-sei", methods=['POST'])
 def verification_handler():
     try:
         body = request.get_json()
@@ -197,13 +182,6 @@ def verification_handler():
         return Response("Invalid or corrupted signature", status=500)
 
 def verify_signed_data(double_name, data, encoded_public_key, intention, expires_in = 30):
-
-    print(double_name)
-    print(data)
-    print(encoded_public_key)
-    print(intention)
-    print(expires_in)
-
     if data is not None:
         decoded_data = base64.b64decode(data)
 

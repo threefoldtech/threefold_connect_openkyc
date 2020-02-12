@@ -18,7 +18,7 @@ import base64
 
 signing_key = nacl.signing.SigningKey(config.HEX_SEED, encoder=nacl.encoding.HexEncoder)
 
-conn = db.create_connection("/pythonsqlite.db")
+conn = db.create_connection("./pythonsqlite.db")
 db.create_db(conn)
 
 app = Flask(__name__)
