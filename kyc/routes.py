@@ -29,7 +29,7 @@ def verify_email_handler():
 
     user_id = body.get('user_id').lower()
     email = body.get('email')
-    redirect_url = config.REDIRECT_URL
+    redirect_url = config.REDIRECT_URL + "/verifyemail"
     public_key = body.get('public_key')
     resend = body.get('resend')
     letters = string.ascii_uppercase + string.ascii_lowercase + string.ascii_letters
