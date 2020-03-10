@@ -3,7 +3,7 @@ staging_build:
         - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
     stage: build
     tags:
-        - builder
+        - openkyc_builder
     script:
         - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
         - echo "Building openkyc for staging"
@@ -28,7 +28,7 @@ production_build:
         - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
     stage: build
     tags:
-        - builder
+        - openkyc_builder
     script:
         - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
         - echo "Building openkyc for production"
@@ -41,7 +41,7 @@ production_deploy:
     when: manual
     stage: deploy
     tags:
-        - openkyc_production_deploy
+        - openkyc_production_deployer
     script:
         - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
         - echo "Deploying openkyc for production"
