@@ -1,0 +1,50 @@
+staging_build:
+    only:
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
+    stage: build
+    tags:
+        - builder
+    script:
+        - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+        - echo "Building openkyc for staging"
+        - docker build . -t jimber/openkyc:staging-$CI_COMMIT_TAG
+        - docker push jimber/openkyc:staging-$CI_COMMIT_TAG
+
+staging_deploy:
+    only:
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
+    stage: deploy
+    tags:
+        - openkyc_staging_deploy
+    script:
+        - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+        - echo "Deploying openkyc for staging"
+        - docker pull jimber/openkyc:staging-$CI_COMMIT_TAG
+        - docker rm -f openkyc
+        - docker run -d -it --name=openkyc --network=jimber_proxy_net --env URL="https://login.staging.jimber.org" --env SEED=$OPENKYC_SEED --env PASSWORD=$OPENKYC_PASSWORD -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:staging-$CI_COMMIT_TAG
+
+production_build:
+    only:
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
+    stage: build
+    tags:
+        - builder
+    script:
+        - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+        - echo "Building openkyc for production"
+        - docker build . -t jimber/openkyc:production-$CI_COMMIT_TAG
+        - docker push jimber/openkyc:production-$CI_COMMIT_TAG
+
+production_deploy:
+    only:
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
+    when: manual
+    stage: deploy
+    tags:
+        - openkyc_production_deploy
+    script:
+        - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
+        - echo "Deploying openkyc for production"
+        - docker pull jimber/openkyc:production-$CI_COMMIT_TAG
+        - docker rm -f openkyc
+        - docker run -d -it --name=openkyc --network=jimber_proxy_net --env URL="https://login.threefold.me" --env SEED=$OPENKYC_SEED --env PASSWORD=$OPENKYC_PASSWORD -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:production-$CI_COMMIT_TAG
