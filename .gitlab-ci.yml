@@ -15,7 +15,7 @@ staging_deploy:
         - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
     stage: deploy
     tags:
-        - openkyc_staging_deploy
+        - openkyc_staging_deployer
     script:
         - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
         - echo "Deploying openkyc for staging"
