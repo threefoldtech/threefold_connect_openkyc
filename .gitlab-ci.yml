@@ -20,7 +20,7 @@ testing_deploy:
         - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
         - echo "Deploying openkyc for testing"
         - docker pull jimber/openkyc:testing-$CI_COMMIT_TAG
-        - docker rm -f openkyc
+        - docker rm -f openkyc || true
         - docker run -d -it --name=openkyc --network=jimber_proxy_net --env URL="https://login.testing.jimber.org" --env SEED=$OPENKYC_SEED_TESTING --env PASSWORD=$OPENKYC_PASSWORD -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:testing-$CI_COMMIT_TAG
 
 staging_build:
@@ -45,7 +45,7 @@ staging_deploy:
         - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
         - echo "Deploying openkyc for staging"
         - docker pull jimber/openkyc:staging-$CI_COMMIT_TAG
-        - docker rm -f openkyc
+        - docker rm -f openkyc || true
         - docker run -d -it --name=openkyc --network=jimber_proxy_net --env URL="https://login.staging.jimber.org" --env SEED=$OPENKYC_SEED_STAGING --env PASSWORD=$OPENKYC_PASSWORD -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:staging-$CI_COMMIT_TAG
 
 production_build:
@@ -71,5 +71,5 @@ production_deploy:
         - docker login --username $DOCKER_USERNAME --password $DOCKER_TOKEN
         - echo "Deploying openkyc for production"
         - docker pull jimber/openkyc:production-$CI_COMMIT_TAG
-        - docker rm -f openkyc
+        - docker rm -f openkyc || true
         - docker run -d -it --name=openkyc --network=3proxynet --env URL="https://login.threefold.me" --env SEED=$OPENKYC_SEED --env PASSWORD=$OPENKYC_PASSWORD -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:production-$CI_COMMIT_TAG
