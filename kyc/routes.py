@@ -182,7 +182,7 @@ def verification_handler():
         logger.debug("Invalid or corrupted signature for sid: %s", body.get("signedEmailIdentifier"))
         return Response("Invalid or corrupted signature", status=500)
 
-def verify_signed_data(double_name, data, encoded_public_key, intention, expires_in = 30):
+def verify_signed_data(double_name, data, encoded_public_key, intention, expires_in = 120):
     if data is not None:
         decoded_data = base64.b64decode(data)
 
@@ -201,6 +201,7 @@ def verify_signed_data(double_name, data, encoded_public_key, intention, expires
                 current_timestamp = time.time() * 1000
                 readable_current_timestamp = datetime.fromtimestamp(int(current_timestamp / 1000))
                 difference = (int(timestamp) - int(current_timestamp)) / 1000
+                # All negative times are accepted, we should refactor this to take the timeout into account and the possibility that the users time is a bit wrong.
                 if difference <= expires_in:
                     logger.debug("Jimber-Authorization-Header verified.")
                     return verified_signed_data
