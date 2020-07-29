@@ -11,6 +11,8 @@ import time
 import base64
 import hashlib
 import logging
+from email.mime.text import MIMEText
+
 
 logging.getLogger("werkzeug").setLevel(level=logging.ERROR)
 
