@@ -12,6 +12,7 @@ import base64
 import hashlib
 import logging
 
+
 logging.getLogger("werkzeug").setLevel(level=logging.ERROR)
 
 logger = logging.getLogger(__name__)
@@ -46,10 +47,9 @@ def verify_email_handler():
 
     url = "{}{}userId={}&verificationCode={}".format(redirect_url, union, user_id, verification_code)
     logger.debug("url: %s", url)
-    msg = "Dear {}, \r\r\n Please click on the following url to verify your email address: {} \r\r\n Kind regards\r\r\n Jimber KYC team.".format(
-        user_id, url)
-    message = 'Subject: {}\n\n{}'.format(config.SUBJECT, msg)
 
+    html = "Hi {} <br><br> You have just created a 3bot account.<br> On behalf of the Threefold 3Bot team, we hereby provide a link to verify your email address. When you click on this link, you will be taken to a page confirming your address is verified.<br> Without this verification, not all features will be available.<br> <a href=""{}>Verify my email address</a><br><br> Thanks,<br>OpenKYC Team".format(user_id, url)
+    
     try:
         if not user:
             logger.debug("not user")
@@ -59,7 +59,7 @@ def verify_email_handler():
             db.update_user_verification_code(conn, user_id, verification_code)
 
         logger.debug("Sending email...")
-        send_email(email, msg)
+        send_email(email, html)
         
         return Response("Mail sent")
     except Exception as exception:
