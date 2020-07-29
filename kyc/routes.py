@@ -63,7 +63,7 @@ def verify_email_handler():
             db.update_user_verification_code(conn, user_id, verification_code)
 
         logger.debug("Sending email...")
-        send_email(email, msg.as_string())
+        send_email(email, msg)
         
         return Response("Mail sent")
     except Exception as exception:
