@@ -11,8 +11,6 @@ import time
 import base64
 import hashlib
 import logging
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 
 logging.getLogger("werkzeug").setLevel(level=logging.ERROR)
@@ -50,9 +48,7 @@ def verify_email_handler():
     url = "{}{}userId={}&verificationCode={}".format(redirect_url, union, user_id, verification_code)
     logger.debug("url: %s", url)
 
-    msg = MIMEMultipart('alternative')
     html = "Hi {} <br><br> You have just created a 3bot account.<br> On behalf of the Threefold 3Bot team, we hereby provide a link to verify your email address. When you click on this link, you will be taken to a page confirming your address is verified.<br> Without this verification, not all features will be available.<br> <a href=""{}>Verify my email address</a><br><br> Thanks,<br>OpenKYC Team".format(user_id, url)
-    msg.attach(MIMEText(html, 'HTML'))
     
     try:
         if not user:
@@ -63,7 +59,7 @@ def verify_email_handler():
             db.update_user_verification_code(conn, user_id, verification_code)
 
         logger.debug("Sending email...")
-        send_email(email, msg)
+        send_email(email, html)
         
         return Response("Mail sent")
     except Exception as exception:
