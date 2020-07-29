@@ -51,7 +51,8 @@ def verify_email_handler():
     logger.debug("url: %s", url)
 
     msg = MIMEMultipart('alternative')
-    msg.attach(MIMEText(u"Hi {} <br><br> You have just created a 3bot account.<br> On behalf of the Threefold 3Bot team, we hereby provide a link to verify your email address. When you click on this link, you will be taken to a page confirming your address is verified.<br> Without this verification, not all features will be available.<br> <a href=""{}>Verify my email address</a><br><br> Thanks,<br>OpenKYC Team".format(user_id, url), 'HTML'))
+    html = "Hi {} <br><br> You have just created a 3bot account.<br> On behalf of the Threefold 3Bot team, we hereby provide a link to verify your email address. When you click on this link, you will be taken to a page confirming your address is verified.<br> Without this verification, not all features will be available.<br> <a href=""{}>Verify my email address</a><br><br> Thanks,<br>OpenKYC Team".format(user_id, url)
+    msg.attach(MIMEText(html, 'HTML'))
     
     try:
         if not user:
