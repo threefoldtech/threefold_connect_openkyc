@@ -99,7 +99,7 @@ def get_signed_email_identifier_handler(userid):
     if user is None:
         logger.debug("User was not found.")
         return Response("User was not found.", status=404)
-        
+
     signed_data_verification_response = verify_signed_data(user[0], request.headers.get('Jimber-Authorization'), user[4], "get-signedemailidentifier")
 
     if(isinstance(signed_data_verification_response, Response)):

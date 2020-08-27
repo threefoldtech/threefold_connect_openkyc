@@ -26,7 +26,7 @@ conn = db.create_connection("/pythonsqlite.db")
 db.create_db(conn)
 
 app = Flask(__name__)
-CORS(app, resources={r"*": {"origins": ["*"]}})
+CORS(app, support_credentials=True, resources={r"*": {"origins": ["*"]}})
 
 def send_email(to_email, message):
     try:
