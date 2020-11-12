@@ -48,7 +48,7 @@ def verify_email_handler():
     url = "{}{}userId={}&verificationCode={}".format(redirect_url, union, user_id, verification_code)
     logger.debug("url: %s", url)
 
-    html = "Hi {} <br><br> You have just created a Threefold Connect account.<br> On behalf of the Threefold Connect team, we hereby provide a link to verify your email address. When you click on this link, you will be taken to a page confirming your address is verified.<br> Without this verification, not all features will be available.<br> <a href=""{}>Verify my email address</a><br><br> Thanks,<br>OpenKYC Team".format(user_id, url)
+    html = "Hi {} <br><br> You have just created a ThreeFold Connect account.<br> On behalf of the ThreeFold Connect team, we hereby provide a link to verify your email address. When you click on this link, you will be taken to a page confirming your address is verified.<br> Without this verification, not all features will be available.<br> <a href=""{}>Verify my email address</a><br><br> Thanks,<br>OpenKYC Team".format(user_id, url)
     
     try:
         if not user:
