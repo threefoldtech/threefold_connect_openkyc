@@ -336,6 +336,29 @@ def verification_handler():
         logger.debug("Invalid or corrupted signature for sid: %s", body.get("signedEmailIdentifier"))
         return Response("Invalid or corrupted signature", status=500)
 
+@app.route("/verification/verify-spi", methods=['POST'])
+def verification_sms_handler():
+    try:
+        body = request.get_json()
+        public_key = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder)
+
+        verify_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
+
+        spi_decoded = base64.b64decode(body.get("signedPhoneIdentifier"))
+        spi = verify_key.verify(spi_decoded)
+
+        logger.debug("Successfully verified signature: %s", spi.decode('utf-8'))
+
+        response = app.response_class(
+            response=spi,
+            mimetype='application/json'
+        )
+
+        return response
+    except Exception as exception:
+        logger.debug("Invalid or corrupted signature for sid: %s", body.get("signedPhoneIdentifier"))
+        return Response("Invalid or corrupted signature", status=500)
+
 
 def verify_signed_data(double_name, data, encoded_public_key, intention, expires_in=3600):
     if data is not None:
