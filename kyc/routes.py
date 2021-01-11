@@ -107,7 +107,7 @@ def send_sms_handler():
 
     user_id = body.get('user_id').lower()
     number = body.get('number')
-    redirect_url = config.REDIRECT_URL + "/verify-sms"
+    redirect_url = config.REDIRECT_URL + "/verifysms"
     public_key = body.get('public_key')
     resend = body.get('resend')
     letters = string.ascii_uppercase + string.ascii_lowercase + string.ascii_letters
@@ -127,7 +127,7 @@ def send_sms_handler():
     url = "{}{}userId={}&verificationCode={}".format(redirect_url, union, user_id, sms_verification_code)
     logger.debug("url: %s", url)
 
-    body = "Hi {} <br><br> You have just created a ThreeFold Connect account.<br> On behalf of the ThreeFold Connect team, we hereby provide a link to verify your email address. When you click on this link, you will be taken to a page confirming your address is verified.<br> Without this verification, not all features will be available.<br> <a href=""{}>Verify my email address</a><br><br> Thanks,<br>OpenKYC Team".format(
+    body = "Hi {}, \nLink to verify my phone number: {}  \nThanks, \nOpenKYC Team".format(
         user_id, url)
 
     try:
