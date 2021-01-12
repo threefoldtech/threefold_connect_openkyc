@@ -55,7 +55,7 @@ def verify_email_handler():
     try:
         if not user:
             logger.debug("not user")
-            db.insert_user(conn, user_id, email, verification_code,0 , public_key, "", "", "", 0,"")
+            db.insert_user(conn, user_id, email, verification_code,0 , public_key, "")
         else:
             logger.debug("updating using verficiation code, because we already have an entry.")
             db.update_user_verification_code(conn, user_id, verification_code)
@@ -69,6 +69,7 @@ def verify_email_handler():
         return Response("Mail sent")
     except Exception as exception:
         logger.debug("Exception")
+        logger.error(exception)
         return Response("Something went wrong", status=500)
 
 
@@ -109,43 +110,42 @@ def send_sms_handler():
     number = body.get('number')
     redirect_url = config.REDIRECT_URL + "/verifysms"
     public_key = body.get('public_key')
-    resend = body.get('resend')
+
     letters = string.ascii_uppercase + string.ascii_lowercase + string.ascii_letters
-    sms_verification_code = ''.join(choice(letters) for i in range(randint(64, 128)))
-    user = db.getUserByName(conn, user_id)
-
-    if not user:
-        logger.debug("not user")
-        return Response('Something went wrong.', status=403)
-
-    logger.debug("verification_code: %s", sms_verification_code)
+    verification_code = ''.join(choice(letters) for i in range(randint(64, 128)))
+    user = db.getPhoneUserByName(conn, user_id)
 
     union = "?"
 
     if union in redirect_url:
         union = "&"
 
-    url = "{}{}userId={}&verificationCode={}".format(redirect_url, union, user_id, sms_verification_code)
+    url = "{}{}userId={}&verificationCode={}".format(redirect_url, union, user_id, verification_code)
     logger.debug("url: %s", url)
 
-    body = "Hi {}, \nLink to verify my phone number: {}  \nThanks, \nOpenKYC Team".format(
+    text = "Hi {}, \nLink to verify my phone number: {}  \nThanks, \nOpenKYC Team".format(
         user_id, url)
 
     try:
+        if not user:
+            logger.debug("not user")
+            db.insert_phone_user(conn, user_id, number, verification_code,0 , public_key, "")
+        else:
+            logger.debug("updating using verficiation code, because we already have an entry.")
+            db.update_phone_user_verification_code(conn, user_id, verification_code)
+
         logger.debug("Sending sms...")
-        db.update_user_sms_verification_code(conn, user_id, sms_verification_code)
+        db.update_phone_user_verification_code(conn, user_id, verification_code)
 
         client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
 
         message = client.messages.create(
             from_=os.environ['TWILIO_FROM_NUMBER'],
             to=number,
-            body=body
+            body=text
         )
 
-        db.update_user_phone_number(conn, user_id, number)
-        print("sms_verification_code")
-        print(sms_verification_code)
+        db.update_phone_user_phone_number(conn, user_id, number)
 
         return Response("SMS sent")
     except Exception as exception:
@@ -159,17 +159,17 @@ def verify_sms_handler():
     body = request.get_json()
     userid = body.get('user_id').lower()
     verification_code = body.get('verification_code')
-    user = db.getUserByName(conn, userid)
+    user = db.getPhoneUserByName(conn, userid)
 
     logger.debug(user)
 
     if user:
-        if verification_code == user[7]:
-            data = bytes('{ "phone": "' + user[6] + '", "identifier": "' + user[0] + '" }', encoding='utf8')
+        if verification_code == user[2]:
+            data = bytes('{ "phone": "' + user[1] + '", "identifier": "' + user[0] + '" }', encoding='utf8')
             signed_phone_identifier = signing_key.sign(data, encoder=nacl.encoding.Base64Encoder)
 
             if signed_phone_identifier:
-                db.update_user(conn, "UPDATE users SET signed_phone_identifier = ? WHERE user_id = ?",
+                db.update_user(conn, "UPDATE phone_users SET signed_phone_identifier = ? WHERE user_id = ?",
                                signed_phone_identifier.decode("utf-8"), user[0])
                 logger.debug("Successfully verified userid %s", user[0])
                 return signed_phone_identifier
@@ -246,16 +246,16 @@ def get_signed_email_identifier_handler(userid):
 @app.route("/verification/retrieve-spi/<userid>", methods=['GET'])
 def get_signed_phone_identifier_handler(userid):
     userid = userid.lower()
-    user = db.getUserByName(conn, userid)
+    user = db.getPhoneUserByName(conn, userid)
 
     if user is None:
         logger.debug("User was not found.")
         return Response("User was not found.", status=404)
 
     signed_data_verification_response = verify_signed_data(user[0], request.headers.get('Jimber-Authorization'),
-                                                           user[9], "get-signedphoneidentifier")
+                                                           user[4], "get-signedphoneidentifier")
 
-    if (isinstance(signed_data_verification_response, Response)):
+    if isinstance(signed_data_verification_response, Response):
         logger.debug("response of verification is of instance Response, failed to verify.")
         return signed_data_verification_response
 
@@ -265,7 +265,7 @@ def get_signed_phone_identifier_handler(userid):
         if user[3] == 1:
             logger.debug("Old account was verified, creating signature.")
 
-            data = bytes('{ "phone": "' + user[6] + '", "identifier": "' + user[0] + '" }', encoding='utf8')
+            data = bytes('{ "phone": "' + user[1] + '", "identifier": "' + user[0] + '" }', encoding='utf8')
             signed_phone_identifier = signing_key.sign(data, encoder=nacl.encoding.Base64Encoder)
 
             spi = {"signed_phone_identifier": signed_phone_identifier.decode("utf-8")}
@@ -275,7 +275,7 @@ def get_signed_phone_identifier_handler(userid):
                 mimetype='application/json'
             )
 
-            logger.debug("SEI: %s", spi)
+            logger.debug("SPI: %s", spi)
             return response
 
         else:
@@ -286,7 +286,7 @@ def get_signed_phone_identifier_handler(userid):
         logger.debug("We found an account: %s", user[0])
         logger.debug("Retrieved signed_phone_identifier for %s", userid)
 
-        db.delete_user(conn, user[0], user[1])
+        db.delete_phone_user(conn, user[0], user[1])
 
         data = {"signed_phone_identifier": user[5]}
 

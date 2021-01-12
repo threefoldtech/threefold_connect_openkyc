@@ -32,11 +32,21 @@ def alter_table(conn, alter_table_sql):
         print("Table already exists. All good.")
 
 
-def insert_user(conn, user_id, email, verification_code, verified, public_key, signed_email_identifier, phone, sms_verification_code,sms_verified, signed_phone_identifier):
+def insert_user(conn, user_id, email, verification_code, verified, public_key, signed_email_identifier):
     try:
-        insert_user_sql = "INSERT INTO users (user_id, email, verification_code, verified, public_key, signed_email_identifier, phone, sms_verification_code,sms_verified, signed_phone_identifier) VALUES (?,?,?,?,?,?,?,?,?,?);"
+        insert_user_sql = "INSERT INTO users (user_id, email, verification_code, verified, public_key, signed_email_identifier) VALUES (?,?,?,?,?,?);"
         c = conn.cursor()
-        c.execute(insert_user_sql, (user_id, email, verification_code, verified, public_key, signed_email_identifier, phone, sms_verification_code,sms_verified, signed_phone_identifier))
+        c.execute(insert_user_sql, (user_id, email, verification_code, verified, public_key, signed_email_identifier))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+
+def insert_phone_user(conn, user_id, phone, verification_code, verified, public_key, signed_phone_identifier):
+    try:
+        insert_user_sql = "INSERT INTO phone_users (user_id, phone, verification_code, verified, public_key, signed_phone_identifier) VALUES (?,?,?,?,?,?);"
+        c = conn.cursor()
+        c.execute(insert_user_sql, (user_id, phone, verification_code, verified, public_key, signed_phone_identifier))
         conn.commit()
     except Error as e:
         print(e)
@@ -51,18 +61,19 @@ def update_user_verification_code(conn, user_id, verification_code):
     except Error as e:
         print(e)
 
-def update_user_sms_verification_code(conn, user_id, verification_code):
+
+def update_phone_user_verification_code(conn, user_id, verification_code):
     try:
-        update_sql = "UPDATE users SET sms_verification_code = ? WHERE user_id = ?;"
+        update_sql = "UPDATE phone_users SET verification_code = ? WHERE user_id = ?;"
         c = conn.cursor()
         c.execute(update_sql, (verification_code, user_id))
         conn.commit()
     except Error as e:
         print(e)
 
-def update_user_phone_number(conn, user_id, number):
+def update_phone_user_phone_number(conn, user_id, number):
     try:
-        update_sql = "UPDATE users SET phone = ? WHERE user_id = ?;"
+        update_sql = "UPDATE phone_users SET phone = ? WHERE user_id = ?;"
         c = conn.cursor()
         c.execute(update_sql, (number, user_id))
         conn.commit()
@@ -75,6 +86,16 @@ def delete_user(conn, user_id, email):
         delete_user_sql = "DELETE FROM users WHERE user_id = ? AND email = ?;"
         c = conn.cursor()
         c.execute(delete_user_sql, (user_id, email))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+
+def delete_phone_user(conn, user_id, phone):
+    try:
+        delete_user_sql = "DELETE FROM phone_users WHERE user_id = ? AND phone = ?;"
+        c = conn.cursor()
+        c.execute(delete_user_sql, (user_id, phone))
         conn.commit()
     except Error as e:
         print(e)
@@ -108,6 +129,17 @@ def update_user(conn, update_sql, *params):
 def getUserByName(conn, user_id):
     print('Getting user by id', user_id)
     find_statement = "SELECT * FROM users WHERE user_id=? LIMIT 1;"
+    try:
+        c = conn.cursor()
+        c.execute(find_statement, (user_id,))
+        return c.fetchone()
+    except Error as e:
+        print(e)
+
+
+def getPhoneUserByName(conn, user_id):
+    print('Getting user by id', user_id)
+    find_statement = "SELECT * FROM phone_users WHERE user_id=? LIMIT 1;"
     try:
         c = conn.cursor()
         c.execute(find_statement, (user_id,))
