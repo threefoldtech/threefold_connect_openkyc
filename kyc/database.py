@@ -34,7 +34,7 @@ def alter_table(conn, alter_table_sql):
 
 def insert_user(conn, user_id, email, verification_code, verified, public_key, signed_email_identifier, phone, sms_verification_code,sms_verified, signed_phone_identifier):
     try:
-        insert_user_sql = "INSERT INTO users (user_id, email, verification_code, verified, public_key, signed_email_identifier, phone, sms_verification_code,sms_verified, signed_phone_identifier) VALUES (?,?,?,?,?,?,?,?,?);"
+        insert_user_sql = "INSERT INTO users (user_id, email, verification_code, verified, public_key, signed_email_identifier, phone, sms_verification_code,sms_verified, signed_phone_identifier) VALUES (?,?,?,?,?,?,?,?,?,?);"
         c = conn.cursor()
         c.execute(insert_user_sql, (user_id, email, verification_code, verified, public_key, signed_email_identifier, phone, sms_verification_code,sms_verified, signed_phone_identifier))
         conn.commit()
