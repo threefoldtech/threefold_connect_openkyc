@@ -55,7 +55,7 @@ def verify_email_handler():
     try:
         if not user:
             logger.debug("not user")
-            db.insert_user(conn, user_id, email, verification_code, 0, public_key, "")
+            db.insert_user(conn, user_id, email, verification_code,0 , public_key, "", "", "", 0,"")
         else:
             logger.debug("updating using verficiation code, because we already have an entry.")
             db.update_user_verification_code(conn, user_id, verification_code)
@@ -115,6 +115,7 @@ def send_sms_handler():
     user = db.getUserByName(conn, user_id)
 
     if not user:
+        logger.debug("not user")
         return Response('Something went wrong.', status=403)
 
     logger.debug("verification_code: %s", sms_verification_code)
