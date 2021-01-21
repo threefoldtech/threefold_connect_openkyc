@@ -123,7 +123,14 @@ def send_sms_handler():
     url = "{}{}userId={}&verificationCode={}".format(redirect_url, union, user_id, verification_code)
     logger.debug("url: %s", url)
 
-    text = "Hi {}, \nLink to verify my phone number: {}  \nThanks, \nOpenKYC Team".format(
+    text = """Hello {},
+
+If you requested a phone verification for ThreeFold Connect, please click the following link.
+
+{}
+
+Thanks,
+OpenKYC Team""".format(
         user_id, url)
 
     try:
