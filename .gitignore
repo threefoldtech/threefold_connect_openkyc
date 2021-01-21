@@ -3,3 +3,5 @@ __pycache__/
 *.db
 py_env/
 .vscode/
+.idea
+venv
