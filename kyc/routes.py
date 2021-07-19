@@ -146,6 +146,17 @@ OpenKYC Team""".format(
 
         client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
 
+        if number.startswith('+1'):
+            message = client.messages.create(
+                    from_=os.environ['TWILIO_FROM_NUMBER_US'],
+                    to=number,
+                    body=text
+            )
+
+            db.update_phone_user_phone_number(conn, user_id, number)
+
+            return Response("SMS sent")
+
         message = client.messages.create(
             from_=os.environ['TWILIO_FROM_NUMBER'],
             to=number,
