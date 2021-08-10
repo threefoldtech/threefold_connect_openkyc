@@ -146,11 +146,7 @@ OpenKYC Team""".format(
 
         client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
 
-        message = client.messages.create(
-                from_=os.environ['TWILIO_FROM_NUMBER_US'],
-                to=number,
-                body=text
-        )
+        message = client.messages.create(messaging_service_sid=os.environ['MESSAGING_SERVICE_SID'], body=text, to=number)
 
         db.update_phone_user_phone_number(conn, user_id, number)
 
