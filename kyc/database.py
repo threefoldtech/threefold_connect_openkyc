@@ -71,6 +71,7 @@ def update_phone_user_verification_code(conn, user_id, verification_code):
     except Error as e:
         print(e)
 
+
 def update_phone_user_phone_number(conn, user_id, number):
     try:
         update_sql = "UPDATE phone_users SET phone = ? WHERE user_id = ?;"
@@ -101,6 +102,16 @@ def delete_phone_user(conn, user_id, phone):
         print(e)
 
 
+def delete_identity_user(conn, user_id):
+    try:
+        delete_user_sql = "DELETE FROM identity_users WHERE user_id = ?"
+        c = conn.cursor()
+        c.execute(delete_user_sql, (user_id,))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+
 def select_all(conn, select_all_users):
     try:
         c = conn.cursor()
@@ -126,6 +137,24 @@ def update_user(conn, update_sql, *params):
         print(e)
 
 
+def update_user_identity_data(conn, signed_identity_name_identifier, signed_identity_country_identifier,
+                              signed_identity_dob_identifier, signed_identity_document_meta_identifier,
+                              signed_identity_gender_identifier, user_id):
+    sql = "UPDATE identity_users SET signed_identity_name_identifier = ?,  " \
+          "signed_identity_country_identifier = ?, signed_identity_dob_identifier = ?, " \
+          "signed_identity_document_meta_identifier = ?, signed_identity_gender_identifier = ? WHERE user_id = ?"
+
+    try:
+        c = conn.cursor()
+        c.execute(sql, (
+            signed_identity_name_identifier, signed_identity_country_identifier, signed_identity_dob_identifier,
+            signed_identity_document_meta_identifier, signed_identity_gender_identifier, user_id))
+        conn.commit()
+
+    except Exception as e:
+        print(e)
+
+
 def getUserByName(conn, user_id):
     print('Getting user by id', user_id)
     find_statement = "SELECT * FROM users WHERE user_id=? LIMIT 1;"
@@ -148,6 +177,55 @@ def getPhoneUserByName(conn, user_id):
         print(e)
 
 
+def get_identity_user_by_name(conn, user_id):
+    print('Getting identity user by id', user_id)
+    find_statement = "SELECT * FROM identity_users WHERE user_id=? LIMIT 1;"
+
+    try:
+        c = conn.cursor()
+        c.execute(find_statement, (user_id,))
+        return c.fetchone()
+    except Error as e:
+        print(e)
+
+
+def insert_identity_user(conn, user_id, verification_code, verified, public_key, signed_identity_name_identifier,
+                         signed_identity_country_identifier, signed_identity_dob_identifier,
+                         signed_identity_document_meta_identifier, signed_identity_gender_identifier):
+    insert_user_sql = """ INSERT INTO identity_users (
+                               user_id,
+                               verification_code,
+                               verified,
+                               public_key,
+                               signed_identity_name_identifier,
+                               signed_identity_country_identifier,
+                               signed_identity_dob_identifier,
+                               signed_identity_document_meta_identifier,
+                               signed_identity_gender_identifier
+                           )
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                           """
+
+    try:
+        c = conn.cursor()
+        c.execute(insert_user_sql, (user_id, verification_code, verified, public_key, signed_identity_name_identifier,
+                                    signed_identity_country_identifier, signed_identity_dob_identifier,
+                                    signed_identity_document_meta_identifier, signed_identity_gender_identifier))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+
+def update_identity_user_verification_code(conn, user_id, verification_code):
+    try:
+        update_sql = "UPDATE identity_users SET verification_code = ? WHERE user_id = ?;"
+        c = conn.cursor()
+        c.execute(update_sql, (verification_code, user_id))
+        conn.commit()
+    except Error as e:
+        print(e)
+
+
 def create_db(conn):
     sql_create_user_table = """CREATE TABLE IF NOT EXISTS users (user_id text NOT NULL UNIQUE,email text NOT NULL,verification_code text NOT NULL, verified integer,public_key text NOT NULL,signed_email_identifier text NULL); """
     if conn is not None:
@@ -157,6 +235,7 @@ def create_db(conn):
 
 
 def run_migrations(conn):
+    print('Running migrations...')
     sql_create_migrations_table = """CREATE TABLE IF NOT EXISTS migrations (migration_id text NOT NULL);"""
     create_table(conn, sql_create_migrations_table)
 
@@ -166,14 +245,23 @@ def run_migrations(conn):
     c.execute(sql_previous_migrations)
     previous_migrations_list = c.fetchall()
 
-    for migration in migrations_list:
-        if migration[0] in previous_migrations_list:
+    previous_migration_ids = []
+
+    for migration_id in previous_migrations_list:
+        previous_migration_ids.append(migration_id[0])
+
+    for migration_id, migration_sql in migrations_list:
+        if migration_id in previous_migration_ids:
             continue
 
         try:
-            c = conn.cursor()
-            c.execute(migration[1])
-            c.execute("INSERT INTO migrations (migration_id) VALUES (?);", (migration[0]))
+            print('Insert the migration in migration table with id... ', migration_id)
+            c.execute('INSERT INTO migrations (migration_id) VALUES (?);', migration_id)
+            conn.commit()
+
+            print('Running migration... ', migration_sql)
+            c.execute(migration_sql)
+            conn.commit()
 
         except Error as e:
             print(e)
