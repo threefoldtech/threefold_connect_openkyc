@@ -5,16 +5,16 @@ import string
 import time
 from datetime import datetime
 from random import *
-import ast
+import hashlib
 
 from flask import Response, request, json
 from twilio.rest import Client
 
 import kyc.config as config
 from helpers.shufti_kyc import get_shufti_data_by_reference, delete_shufti_data_by_reference, \
-    extract_data_from_callback, prepare_data_for_signing
+    extract_data_from_callback, prepare_data_for_signing, get_shufti_access_token
 from kyc import app, signing_key, nacl, db, conn, send_email
-from kyc.database import update_user_identity_data
+from kyc.database import update_user_identity_data, insert_access_token_attempt, get_attempts_by_hash_spi
 
 logging.getLogger("werkzeug").setLevel(level=logging.ERROR)
 
@@ -27,32 +27,6 @@ formatter = logging.Formatter("[%(asctime)s][%(filename)s:%(lineno)s - %(funcNam
 handler.setFormatter(formatter)
 
 logger.addHandler(handler)
-
-
-@app.route('/testing')
-def testing():
-    data = {'reference': 'lfchvhnJRoNWBgNqoDtgoIGgPPntvjAwUgRpfMEHFhuTOJPydyuydjuYvjgNhAvtYhaFnpijyZMmkYCdIJzbXWn',
-            'event': 'verification.accepted', 'country': None, 'proofs': {'document': {
-            'additional_proof': 'https://api.shuftipro.com/storage/ZLiboBuJdDVBkMh40FJ2qjv08YB3x4VdPIo147fgIDnEd4tZA0r5witT23e72B7M/document/additional_proof.jpeg?access_token=55950e2b92916709f04a1bba5cb2eaa72020bd3c',
-            'proof': 'https://api.shuftipro.com/storage/ZLiboBuJdDVBkMh40FJ2qjv08YB3x4VdPIo147fgIDnEd4tZA0r5witT23e72B7M/document/proof.jpeg?access_token=55950e2b92916709f04a1bba5cb2eaa72020bd3c'}},
-            'verification_data': {
-                'document': {'name': {'first_name': 'Lennert Luc', 'middle_name': None, 'last_name': 'Defauw'},
-                             'dob': '2000-08-17', 'expiry_date': '2023-06-13', 'issue_date': '2017-06-13',
-                             'document_number': '592608043268', 'gender': 'M', 'selected_type': ['id_card'],
-                             'supported_types': ['id_card']}}, 'verification_result': {
-            'document': {'document': 1, 'gender': 1, 'match_document_front_and_backside': 1, 'document_proof': 1,
-                         'document_number': 1, 'name': 1, 'expiry_date': 1, 'issue_date': 1, 'dob': 1,
-                         'document_visibility': 1, 'document_must_not_be_expired': 1, 'document_country': 1,
-                         'selected_type': 1}}, 'info': {
-            'agent': {'is_desktop': True, 'is_phone': False, 'useragent': 'Dart/2.13 (dart:io)', 'device_name': '0',
-                      'browser_name': '', 'platform_name': ''},
-            'geolocation': {'host': '', 'ip': '213.118.3.190', 'rdns': '213.118.3.190', 'asn': '6848',
-                            'isp': 'Telenet Bvba', 'country_name': 'Belgium', 'country_code': 'BE',
-                            'region_name': 'Flanders', 'region_code': 'VLG', 'city': 'Oostkamp', 'postal_code': '8020',
-                            'continent_name': 'Europe', 'continent_code': 'EU', 'latitude': '51.154441833496094',
-                            'longitude': '3.235189914703369', 'metro_code': '', 'timezone': 'Europe/Brussels',
-                            'ip_type': 'ipv4', 'capital': 'Brussels', 'currency': 'EUR'}}}
-    return extract_data_from_callback(data)
 
 
 @app.route("/verification/send-email", methods=['POST'])
@@ -217,6 +191,53 @@ def verify_sms_handler():
         return Response('Something went wrong.', status=403)
 
 
+@app.route('/verification/shufti-access-token', methods=['POST'])
+def get_shufti_token():
+    REQUEST_LIMIT = int(os.environ['SHUFTI_REQUEST_LIMIT'])
+    body = request.get_json()
+
+    try:
+        public_key = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder)
+        verify_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
+
+        spi_decoded = base64.b64decode(body.get('signedPhoneIdentifier'))
+        spi = verify_key.verify(spi_decoded)
+
+        logger.debug("Successfully verified signature: %s", spi.decode('utf-8'))
+
+    except Exception as e:
+        logger.error('Error in Shufti-Access-Token')
+        logger.error("Couldn't sign the SPI")
+        print(e)
+        return Response('We were not able to sign the SPI', 500)
+
+    try:
+        hashed_spi = hashlib.sha256(str.encode(body.get('signedPhoneIdentifier')))
+        hex_dig = hashed_spi.hexdigest()
+
+        attempts = get_attempts_by_hash_spi(conn, hex_dig)
+        if len(attempts) >= REQUEST_LIMIT:
+            logger.debug('Daily limit of SPI has been exceed')
+            return Response('Daily limit of SPI has been exceed', 403)
+
+        insert_access_token_attempt(conn, hex_dig)
+
+        access_token = get_shufti_access_token()
+        if access_token is None:
+            return Response('Access token could not be made', 500)
+
+        return app.response_class(
+            response=json.dumps(access_token),
+            mimetype='application/json'
+        )
+
+    except Exception as e:
+        logger.error('Error in Shufti-Access-Token')
+        logger.error("Couldn't hash the SPI")
+        print(e)
+        return Response('Internal Server Error', 500)
+
+
 @app.route("/verification/send-identity", methods=['POST'])
 def get_verification_code_for_identity():
     body = request.get_json()
@@ -225,8 +246,11 @@ def get_verification_code_for_identity():
 
     user_id = body.get('user_id').lower()
     kyc_level = body.get('kycLevel')
-    public_key = body.get('public_key')
 
+    if int(kyc_level) < 2 or kyc_level is None:
+        return Response("Only KYC level 2 is accepted.", status=403)
+
+    public_key = body.get('public_key')
     letters = string.ascii_uppercase + string.ascii_lowercase + string.ascii_letters
     verification_code = ''.join(choice(letters) for i in range(randint(64, 128)))
 
@@ -253,7 +277,7 @@ def get_verification_code_for_identity():
         )
 
     except Exception as exception:
-        logger.debug("Exception")
+        logger.debug("Error in send-identity")
         logger.error(exception)
         return Response("Something went wrong", status=500)
 
@@ -263,9 +287,10 @@ def verify_identity_handler():
     logger.debug('POST Call on verify-identity')
     body = request.get_json()
     userid = body.get('user_id').lower()
+    kyc_level = body.get('kycLevel')
 
-    # TODO: uncomment this for dev purposes
-    # kyc_level = json.loads(body.get('kycLevel'))['kycLevel']
+    if int(kyc_level) < 2 or kyc_level is None:
+        return Response("Only KYC level 2 is accepted.", status=403)
 
     reference = body.get('reference')
     user = db.get_identity_user_by_name(conn, userid)
@@ -276,46 +301,48 @@ def verify_identity_handler():
     if reference != user[1]:
         return Response("Can't sign the identity since the verification code does not match", 400)
 
-    # TODO: uncomment this for dev purposes
-    # if kyc_level is None or int(kyc_level) != 3:
-    #     return Response("Can't sign the identity since you need KYC level 3", 400)
+    try:
+        shufti_data = get_shufti_data_by_reference(reference)
+        extracted_data = extract_data_from_callback(shufti_data)
+        prepared_data = prepare_data_for_signing(extracted_data, user)
 
-    # SHUFTI DATA CALL  TO BACKEND WITH REFERENCE
-    shufti_data = get_shufti_data_by_reference(reference)
-    extracted_data = extract_data_from_callback(shufti_data)
-
-    prepared_data = prepare_data_for_signing(extracted_data, user)
-
-    signed_identity_name_identifier = signing_key.sign(prepared_data['name_data'], encoder=nacl.encoding.Base64Encoder)
-    signed_identity_country_identifier = signing_key.sign(prepared_data['country_data'],
+        signed_identity_name_identifier = signing_key.sign(prepared_data['name_data'],
+                                                           encoder=nacl.encoding.Base64Encoder)
+        signed_identity_country_identifier = signing_key.sign(prepared_data['country_data'],
+                                                              encoder=nacl.encoding.Base64Encoder)
+        signed_identity_dob_identifier = signing_key.sign(prepared_data['dob_data'],
                                                           encoder=nacl.encoding.Base64Encoder)
-    signed_identity_dob_identifier = signing_key.sign(prepared_data['dob_data'], encoder=nacl.encoding.Base64Encoder)
-    signed_identity_document_meta_data_identifier = signing_key.sign(prepared_data['document_meta_data'],
-                                                                     encoder=nacl.encoding.Base64Encoder)
-    signed_identity_gender_identifier = signing_key.sign(prepared_data['gender_data'],
-                                                         encoder=nacl.encoding.Base64Encoder)
-    signed_identity_is_identified_identifier = signing_key.sign(prepared_data['is_identified_data'],
-                                                                encoder=nacl.encoding.Base64Encoder)
+        signed_identity_document_meta_data_identifier = signing_key.sign(prepared_data['document_meta_data'],
+                                                                         encoder=nacl.encoding.Base64Encoder)
+        signed_identity_gender_identifier = signing_key.sign(prepared_data['gender_data'],
+                                                             encoder=nacl.encoding.Base64Encoder)
+        signed_identity_is_identified_identifier = signing_key.sign(prepared_data['is_identified_data'],
+                                                                    encoder=nacl.encoding.Base64Encoder)
 
-    if signed_identity_name_identifier is None:
-        return Response("Failed to sign the name data", 400)
-    if signed_identity_country_identifier is None:
-        return Response("Failed to sign the country data", 400)
-    if signed_identity_dob_identifier is None:
-        return Response("Failed to sign the dob data", 400)
-    if signed_identity_document_meta_data_identifier is None:
-        return Response("Failed to sign the document_meta_data data", 400)
-    if signed_identity_gender_identifier is None:
-        return Response("Failed to sign the gender data", 400)
-    if signed_identity_is_identified_identifier is None:
-        return Response("Failed to sign the is_identified data", 400)
+        if signed_identity_name_identifier is None:
+            return Response("Failed to sign the name data", 400)
+        if signed_identity_country_identifier is None:
+            return Response("Failed to sign the country data", 400)
+        if signed_identity_dob_identifier is None:
+            return Response("Failed to sign the dob data", 400)
+        if signed_identity_document_meta_data_identifier is None:
+            return Response("Failed to sign the document_meta_data data", 400)
+        if signed_identity_gender_identifier is None:
+            return Response("Failed to sign the gender data", 400)
+        if signed_identity_is_identified_identifier is None:
+            return Response("Failed to sign the is_identified data", 400)
 
-    update_user_identity_data(conn, signed_identity_name_identifier, signed_identity_country_identifier,
-                              signed_identity_dob_identifier, signed_identity_document_meta_data_identifier,
-                              signed_identity_gender_identifier, user[0])
+        update_user_identity_data(conn, signed_identity_name_identifier, signed_identity_country_identifier,
+                                  signed_identity_dob_identifier, signed_identity_document_meta_data_identifier,
+                                  signed_identity_gender_identifier, user[0])
 
-    logger.debug("Successfully verified identity for user %s", user[0])
-    return Response('OK', 200)
+        logger.debug("Successfully verified identity for user %s", user[0])
+        return Response('OK', 200)
+
+    except Exception as e:
+        logger.debug("Error in verify-identity")
+        logger.error(e)
+        return Response("Something went wrong", status=500)
 
 
 @app.route("/verification/retrieve-sii/<userid>", methods=['GET'])
@@ -333,48 +360,52 @@ def get_signed_identity_identifier_handler(userid):
         logger.debug("Failed to verify")
         return signed_response
 
-    signed_identity_name_identifier = user[4]
-    signed_identity_country_identifier = user[5]
-    signed_identity_dob_identifier = user[6]
-    signed_identity_document_meta_identifier = user[7]
-    signed_identity_gender_identifier = user[8]
+    try:
+        signed_identity_name_identifier = user[4]
+        signed_identity_country_identifier = user[5]
+        signed_identity_dob_identifier = user[6]
+        signed_identity_document_meta_identifier = user[7]
+        signed_identity_gender_identifier = user[8]
 
-    if signed_identity_name_identifier is None:
-        return Response("signed_identity_name_identifier not found.", 404)
+        if signed_identity_name_identifier is None:
+            return Response("signed_identity_name_identifier not found.", 404)
 
-    if signed_identity_country_identifier is None:
-        return Response("signed_identity_country_identifier not found.", 404)
+        if signed_identity_country_identifier is None:
+            return Response("signed_identity_country_identifier not found.", 404)
 
-    if signed_identity_dob_identifier is None:
-        return Response("signed_identity_dob_identifier not found.", 404)
+        if signed_identity_dob_identifier is None:
+            return Response("signed_identity_dob_identifier not found.", 404)
 
-    if signed_identity_document_meta_identifier is None:
-        return Response("signed_identity_document_meta_identifier not found.", 404)
+        if signed_identity_document_meta_identifier is None:
+            return Response("signed_identity_document_meta_identifier not found.", 404)
 
-    if signed_identity_gender_identifier is None:
-        return Response("signed_identity_gender_identifier not found.", 404)
+        if signed_identity_gender_identifier is None:
+            return Response("signed_identity_gender_identifier not found.", 404)
 
-    logger.debug("We found an account: %s", user[0])
-    logger.debug("Retrieved SII for %s", userid)
+        logger.debug("We found an account: %s", user[0])
+        logger.debug("Retrieved SII for %s", userid)
 
-    # db.delete_identity_user(conn, user[0])
+        db.delete_identity_user(conn, user[0])
 
-    data = {
-        "signed_identity_name_identifier": signed_identity_name_identifier.decode('utf-8'),
-        "signed_identity_country_identifier": signed_identity_country_identifier.decode('utf-8'),
-        "signed_identity_dob_identifier": signed_identity_dob_identifier.decode('utf-8'),
-        "signed_identity_document_meta_identifier": signed_identity_document_meta_identifier.decode('utf-8'),
-        "signed_identity_gender_identifier": signed_identity_gender_identifier.decode('utf-8')
-    }
+        data = {
+            "signed_identity_name_identifier": signed_identity_name_identifier.decode('utf-8'),
+            "signed_identity_country_identifier": signed_identity_country_identifier.decode('utf-8'),
+            "signed_identity_dob_identifier": signed_identity_dob_identifier.decode('utf-8'),
+            "signed_identity_document_meta_identifier": signed_identity_document_meta_identifier.decode('utf-8'),
+            "signed_identity_gender_identifier": signed_identity_gender_identifier.decode('utf-8')
+        }
 
-    print(data)
+        response = app.response_class(
+            response=json.dumps(data),
+            mimetype='application/json'
+        )
 
-    response = app.response_class(
-        response=json.dumps(data),
-        mimetype='application/json'
-    )
+        return response
 
-    return response
+    except Exception as e:
+        logger.debug("Error in retrieve SII")
+        logger.error(e)
+        return Response("Something went wrong", status=500)
 
 
 @app.route("/verification/retrieve-sei/<userid>", methods=['GET'])
@@ -530,13 +561,13 @@ def verification_identity_handler():
 
         reference = body.get('reference')
         if reference is None:
-            # TODO: implement this
-            return
+            return Response("Couldn't delete the KYC data since the reference is not given", status=500)
 
         delete_shufti_data_by_reference(reference)
 
         response_data = {
-            'signedIdentityNameIdentifierVerified': signed_identity_name_identifier_verified.decode('utf-8'),
+            'signedIdentityNameIdentifierVerified': signed_identity_name_identifier_verified.decode(
+                'utf-8'),
             'signedIdentityCountryIdentifierVerified': signed_identity_country_identifier_verified.decode('utf-8'),
             'signedIdentityDOBIdentifierVerified': signed_identity_dob_identifier_verified.decode('utf-8'),
             'signedIdentityDocumentMetaIdentifierVerified': signed_identity_document_meta_identifier_verified.decode(
@@ -575,6 +606,7 @@ def verification_handler():
         )
 
         return response
+
     except Exception as exception:
         logger.debug("Invalid or corrupted signature for sid: %s", body.get("signedEmailIdentifier"))
         return Response("Invalid or corrupted signature", status=500)
@@ -590,8 +622,6 @@ def verification_sms_handler():
 
         spi_decoded = base64.b64decode(body.get("signedPhoneIdentifier"))
         spi = verify_key.verify(spi_decoded)
-        print('DE SPIIIIIIIIII')
-        print(spi)
 
         logger.debug("Successfully verified signature: %s", spi.decode('utf-8'))
 

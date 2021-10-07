@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 from sqlite3 import Error
 
@@ -173,6 +174,32 @@ def getPhoneUserByName(conn, user_id):
         c = conn.cursor()
         c.execute(find_statement, (user_id,))
         return c.fetchone()
+    except Error as e:
+        print(e)
+
+
+def insert_access_token_attempt(conn, hash_spi):
+    print('Inserting access token attempt')
+    update_statement = "INSERT into shufti_requests(day, hash_spi) VALUES (?, ?)"
+
+    try:
+        c = conn.cursor()
+        c.execute(update_statement, (datetime.datetime.now(), hash_spi))
+        conn.commit()
+
+    except Error as e:
+        print(e)
+
+
+def get_attempts_by_hash_spi(conn, hash_spi):
+    print('Getting attempts by hash SPI')
+    update_statement = "SELECT * from shufti_requests where hash_spi = ? and day >= datetime(?, '-1 day')"
+
+    try:
+        c = conn.cursor()
+        c.execute(update_statement, (hash_spi, datetime.datetime.now()))
+        return c.fetchall()
+
     except Error as e:
         print(e)
 
