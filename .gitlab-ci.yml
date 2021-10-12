@@ -21,7 +21,7 @@ staging_deploy:
     - echo "Deploying openkyc for staging"
     - docker pull jimber/openkyc:staging-$CI_COMMIT_TAG
     - docker rm -f openkyc
-    - docker run -d -it --restart=unless-stopped --name=openkyc --network=jimber_proxy_net --env URL="https://login.staging.jimber.org" --env SEED=$OPENKYC_SEED --env PASSWORD=$OPENKYC_PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN_STAGING --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID_STAGING --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER_STAGING --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER_US_STAGING --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID --env SHUFTI_REQUEST_LIMIT=$SHUFTI_REQUEST_LIMIT --env SHUFTI_CLIENT_ID=%SHUFTI_CLIENT_ID --env SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:staging-$CI_COMMIT_TAG
+    - docker run -d -it --restart=unless-stopped --name=openkyc --network=jimber_proxy_net --env URL="https://login.staging.jimber.org" --env SEED=$OPENKYC_SEED --env PASSWORD=$OPENKYC_PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN_STAGING --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID_STAGING --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER_STAGING --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER_US_STAGING --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID --env SHUFTI_REQUEST_LIMIT=$SHUFTI_REQUEST_LIMIT --env SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID --env SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:staging-$CI_COMMIT_TAG
 
 production_build:
   only:
