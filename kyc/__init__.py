@@ -24,6 +24,7 @@ signing_key = nacl.signing.SigningKey(config.HEX_SEED, encoder=nacl.encoding.Hex
 
 conn = db.create_connection("/pythonsqlite.db")
 db.create_db(conn)
+db.run_migrations(conn)
 
 app = Flask(__name__)
 CORS(app, support_credentials=True, resources={r"*": {"origins": ["*"]}})

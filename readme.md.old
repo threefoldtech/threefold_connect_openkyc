@@ -89,7 +89,7 @@ pip install -r requirements.txt
 Run
 ```bash
 export FLASK_APP=openkyc.py
-flask run --reload --debugger -p 5005
+flask run --reload --debugger -p 5005 --host 0.0.0.0
 ```
 
 ### Deploy
