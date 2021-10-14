@@ -13,6 +13,7 @@ from twilio.rest import Client
 import kyc.config as config
 from helpers.shufti_kyc import get_shufti_data_by_reference, delete_shufti_data_by_reference, \
     extract_data_from_callback, prepare_data_for_signing, get_shufti_access_token
+from helpers.sign_data import sign
 from kyc import app, signing_key, nacl, db, conn, send_email
 from kyc.database import update_user_identity_data, insert_access_token_attempt, get_attempts_by_hash_spi
 
@@ -306,18 +307,12 @@ def verify_identity_handler():
         extracted_data = extract_data_from_callback(shufti_data)
         prepared_data = prepare_data_for_signing(extracted_data, user)
 
-        signed_identity_name_identifier = signing_key.sign(prepared_data['name_data'],
-                                                           encoder=nacl.encoding.Base64Encoder)
-        signed_identity_country_identifier = signing_key.sign(prepared_data['country_data'],
-                                                              encoder=nacl.encoding.Base64Encoder)
-        signed_identity_dob_identifier = signing_key.sign(prepared_data['dob_data'],
-                                                          encoder=nacl.encoding.Base64Encoder)
-        signed_identity_document_meta_data_identifier = signing_key.sign(prepared_data['document_meta_data'],
-                                                                         encoder=nacl.encoding.Base64Encoder)
-        signed_identity_gender_identifier = signing_key.sign(prepared_data['gender_data'],
-                                                             encoder=nacl.encoding.Base64Encoder)
-        signed_identity_is_identified_identifier = signing_key.sign(prepared_data['is_identified_data'],
-                                                                    encoder=nacl.encoding.Base64Encoder)
+        signed_identity_name_identifier = sign(prepared_data['name_data'])
+        signed_identity_country_identifier = sign(prepared_data['country_data'])
+        signed_identity_dob_identifier = sign(prepared_data['dob_data'])
+        signed_identity_document_meta_data_identifier = sign(prepared_data['document_meta_data'])
+        signed_identity_gender_identifier = sign(prepared_data['gender_data'])
+        signed_identity_is_identified_identifier = sign(prepared_data['is_identified_data'])
 
         if signed_identity_name_identifier is None:
             return Response("Failed to sign the name data", 400)
