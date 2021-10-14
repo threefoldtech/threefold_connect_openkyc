@@ -2,8 +2,6 @@ import base64, requests, json, hashlib
 import logging
 import os
 
-url = 'https://api.shuftipro.com/delete'
-
 client_id = os.environ['SHUFTI_CLIENT_ID']
 secret_key = os.environ['SHUFTI_SECRET_ID']
 
@@ -64,6 +62,8 @@ def get_shufti_data_by_reference(reference):
 
 
 def delete_shufti_data_by_reference(reference):
+    url = 'https://api.shuftipro.com/delete'
+
     delete_request = {
         "reference": reference,
         "comment": "Automatic deletion of data"
