@@ -38,4 +38,4 @@ jobs:
     - name: Killing old docker 
       run: docker rm -f openkyc || true
     - name: Start Docker with env vars
-      run: docker run -d -it --restart=unless-stopped --name=openkyc --network=jimber_proxy_net --env URL=$URL --env SEED=$SEED --env PASSWORD=$PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN_STAGING --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID_STAGING --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER_STAGING --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:staging-${{ github.sha }}
+      run: docker run -d -it --restart=unless-stopped --name=openkyc --network=proxy --env URL=$URL --env SEED=$SEED --env PASSWORD=$PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN_STAGING --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID_STAGING --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER_STAGING --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:staging-${{ github.sha }}
