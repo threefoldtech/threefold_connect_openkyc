@@ -1,1 +1,1 @@
-OpenKYC
+OpenKYC for Threefold Connect
