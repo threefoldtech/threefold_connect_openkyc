@@ -44,6 +44,7 @@ def send_email(to_email, message):
         server.login(config.EMAIL_ADDRESS, config.PASSWORD)
 
         server.sendmail(config.EMAIL_ADDRESS, to_email, msg.as_string())
+        print('Mail has been sent.')
         server.quit()
     except Exception as woo:
         print(woo)
