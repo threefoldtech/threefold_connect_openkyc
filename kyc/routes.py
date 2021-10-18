@@ -65,7 +65,7 @@ def verify_email_handler():
             logger.debug("updating using verficiation code, because we already have an entry.")
             db.update_user_verification_code(conn, user_id, verification_code)
 
-        logger.debug("Sending email...")
+        logger.debug("Sending email to %s ..." % email)
         send_email(email, html)
         print("verification_code")
         print(verification_code)
