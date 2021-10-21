@@ -200,7 +200,6 @@ def get_shufti_token():
     try:
         public_key = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder)
         verify_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
-
         spi_decoded = base64.b64decode(body.get('signedPhoneIdentifier'))
         spi = verify_key.verify(spi_decoded)
 
@@ -581,6 +580,36 @@ def verification_identity_handler():
         logger.debug(exception)
         return Response("Invalid or corrupted signature", status=500)
 
+
+# This function is only used to verify identifiers in the example login.
+@app.route("/verification/verify-identity-identifier", methods=['POST'])
+def verification_identity_specific_handler():
+    try:
+        identifier = request.args.get('identifier')
+        body = request.get_json()
+
+        public_key = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder)
+        verify_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
+
+        signed_identity_identifier_decoded = base64.b64decode(body.get('identifier'))
+
+        signed_identity_identifier_verified = verify_key.verify(signed_identity_identifier_decoded)
+
+        response_data = {
+            identifier: signed_identity_identifier_verified.decode(
+                'utf-8'),
+        }
+
+        response = app.response_class(
+            response=json.dumps(response_data),
+            mimetype='application/json'
+        )
+
+        return response
+
+    except Exception as exception:
+        logger.debug(exception)
+        return Response("Invalid or corrupted signature", status=500)
 
 @app.route("/verification/verify-sei", methods=['POST'])
 def verification_handler():
