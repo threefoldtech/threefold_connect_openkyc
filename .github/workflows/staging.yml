@@ -14,7 +14,7 @@ env:
   MESSAGING_SERVICE_SID: ${{ secrets.MESSAGING_SERVICE_SID }}
   SHUFTI_CLIENT_ID: ${{ secrets.SHUFTI_CLIENT_ID }}
   SHUFTI_SECRET_ID: ${{ secrets.SHUFTI_SECRET_ID }}
-  SHUFTI_REQUEST_LIMIT: 5
+  SHUFTI_REQUEST_LIMIT: 100
   URL: "https://login.staging.jimber.io"
   
 jobs:

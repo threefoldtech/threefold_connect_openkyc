@@ -216,9 +216,10 @@ def get_shufti_token():
         hex_dig = hashed_spi.hexdigest()
 
         attempts = get_attempts_by_hash_spi(conn, hex_dig)
-        if len(attempts) >= REQUEST_LIMIT:
-            logger.debug('Daily limit of SPI has been exceed')
-            return Response('Daily limit of SPI has been exceed', 403)
+        # TODO: ENABLE THIS WHEN KEN IS DONE WITH TESTING
+        # if len(attempts) >= REQUEST_LIMIT:
+        #     logger.debug('Daily limit of SPI has been exceed')
+        #     return Response('Daily limit of SPI has been exceed', 403)
 
         insert_access_token_attempt(conn, hex_dig)
 
