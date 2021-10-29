@@ -63,8 +63,7 @@ def verify_email_handler():
             db.insert_user(conn, user_id, email, verification_code, 0, public_key, "")
         else:
             logger.debug("updating using verficiation code, because we already have an entry.")
-            logger.debug('with email %s' % email)
-            db.update_user_verification_code(conn, user_id, verification_code, email)
+            db.update_user_verification_code(conn, user_id, verification_code)
 
         logger.debug("Sending email to %s ..." % email)
         send_email(email, html)

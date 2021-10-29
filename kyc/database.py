@@ -53,11 +53,11 @@ def insert_phone_user(conn, user_id, phone, verification_code, verified, public_
         print(e)
 
 
-def update_user_verification_code(conn, user_id, verification_code, email):
+def update_user_verification_code(conn, user_id, verification_code):
     try:
-        update_sql = "UPDATE users SET verification_code = ?, email = ? WHERE user_id = ?;"
+        update_sql = "UPDATE users SET verification_code = ? WHERE user_id = ?;"
         c = conn.cursor()
-        c.execute(update_sql, (verification_code, user_id, email))
+        c.execute(update_sql, (verification_code, user_id))
         conn.commit()
     except Error as e:
         print(e)
