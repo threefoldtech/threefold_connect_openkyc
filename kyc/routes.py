@@ -63,7 +63,8 @@ def verify_email_handler():
             db.insert_user(conn, user_id, email, verification_code, 0, public_key, "")
         else:
             logger.debug("updating using verficiation code, because we already have an entry.")
-            db.update_user_verification_code(conn, user_id, verification_code)
+            logger.debug('with email %s' % email)
+            db.update_user_verification_code(conn, user_id, verification_code, email)
 
         logger.debug("Sending email to %s ..." % email)
         send_email(email, html)
@@ -557,7 +558,7 @@ def verification_identity_handler():
         if reference is None:
             return Response("Couldn't delete the KYC data since the reference is not given", status=500)
 
-        delete_shufti_data_by_reference(reference)
+        # delete_shufti_data_by_reference(reference)
 
         response_data = {
             'signedIdentityNameIdentifierVerified': signed_identity_name_identifier_verified.decode(
