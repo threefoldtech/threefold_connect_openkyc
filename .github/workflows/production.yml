@@ -19,7 +19,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: jimber-staging-server
     steps:
       - uses: actions/checkout@v2
       - name: Log into GitHub Container Registry
@@ -31,7 +31,7 @@ jobs:
 
   deploy:
    needs: build
-   runs-on: prod
+   runs-on: whale
    steps:
     - name: Deploying OpenKYC for Production
       run: docker pull jimber/openkyc:production-${{ github.sha }}
