@@ -1,0 +1,41 @@
+name: production
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]"
+
+env:
+  SEED: ${{ secrets.SEED }}
+  PASSWORD: ${{ secrets.PASSWORD }}
+  TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+  TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+  TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+  MESSAGING_SERVICE_SID: ${{ secrets.MESSAGING_SERVICE_SID }}
+  SHUFTI_CLIENT_ID: ${{ secrets.SHUFTI_CLIENT_ID }}
+  SHUFTI_SECRET_ID: ${{ secrets.SHUFTI_SECRET_ID }}
+  SHUFTI_REQUEST_LIMIT: 5
+  URL: "https://login.threefold.me"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      - name: Building OpenKYC for Production
+        run: docker build . -t jimber/openkyc:production-${{ github.sha }}
+      - name: Push image to Docker Hub
+        run: docker push jimber/openkyc:production-${{ github.sha }}
+
+  deploy:
+   needs: build
+   runs-on: prod
+   steps:
+    - name: Deploying OpenKYC for Production
+      run: docker pull jimber/openkyc:production-${{ github.sha }}
+    - name: Killing old docker
+      run: docker rm -f openkyc
+    - name: Start Docker with env vars
+      run: docker run -d -it --restart=unless-stopped --name=openkyc --network=3proxynet --env URL=$URL --env SEED=$SEED --env PASSWORD=$PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID --env SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID --env SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID --env SHUFTI_REQUEST_LIMIT=$SHUFTI_REQUEST_LIMIT -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:production-${{ github.sha }}
