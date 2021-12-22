@@ -31,7 +31,7 @@ jobs:
 
   deploy:
    needs: build
-   runs-on: whale
+   runs-on: whale-replacement
    steps:
     - name: Deploying OpenKYC for Production
       run: docker pull jimber/openkyc:production-${{ github.sha }}
