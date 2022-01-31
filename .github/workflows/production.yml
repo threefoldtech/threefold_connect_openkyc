@@ -69,6 +69,7 @@ jobs:
          echo ${{ secrets.SHUFTI_CLIENT_ID }} >> secrets.txt
          echo ${{ secrets.SHUFTI_SECRET_ID }} >> secrets.txt
          cat secrets.txt
+         echo pwd
          stat secrets.txt
       - name: Upgrade production on cluster
         run: | 
