@@ -60,16 +60,8 @@ jobs:
 
       - name: echo
         run: |
-         echo ${{ secrets.TWILIO_AUTH_TOKEN }} >> ${HOME}/.kube/secrets.txt
-         echo ${{ secrets.TWILIO_ACCOUNT_SID }} >> ${HOME}/.kube/secrets.txt
-         echo ${{ secrets.TWILIO_FROM_NUMBER }} >> ${HOME}/.kube/secrets.txt
-         echo ${{ secrets.PASSWORD }} >> ${HOME}/.kube/secrets.txt
-          echo ${{ secrets.SEED }} >> ${HOME}/.kube/secrets.txt
-         echo ${{ secrets.MESSAGING_SERVICE_SID }} >> ${HOME}/.kube/secrets.txt
-         echo ${{ secrets.SHUFTI_CLIENT_ID }} >> ${HOME}/.kube/secrets.txt
-         echo ${{ secrets.SHUFTI_SECRET_ID }} >> ${HOME}/.kube/secrets.txt
-         cat ${HOME}/.kube/secrets.txt
-         stat ${HOME}/.kube/secrets.txt
+         rm -rf ${HOME}/.kube/secrets.txt
+         rm -rf secrets.txt
       - name: Upgrade production on cluster
         run: | 
           helm upgrade -n jimber openkyc helm_files -f helm_files/valuesProduction.yaml \
