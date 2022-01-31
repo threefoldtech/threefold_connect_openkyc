@@ -1,0 +1,18 @@
+# Default values for 3botlogin.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+environment: prod
+
+image:
+        tag: production-7dd0283f2f9075bccf305ff4c32f0c58bb8b4225
+
+
+
+ingress:
+        # Used to create an Ingress record.
+        hosts:
+                - name: openkyc.live
+                  service: openkyc-prod
+                  path: /
+                  port: 80

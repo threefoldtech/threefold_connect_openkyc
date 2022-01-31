@@ -29,13 +29,42 @@ jobs:
       - name: Push image to Docker Hub
         run: docker push jimber/openkyc:production-${{ github.sha }}
 
-  deploy:
-   needs: build
-   runs-on: whale-replacement
-   steps:
-    - name: Deploying OpenKYC for Production
-      run: docker pull jimber/openkyc:production-${{ github.sha }}
-    - name: Killing old docker
-      run: docker rm -f openkyc
-    - name: Start Docker with env vars
-      run: docker run -d -it --restart=unless-stopped --name=openkyc --network=3proxynet --env URL=$URL --env SEED=$SEED --env PASSWORD=$PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID --env SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID --env SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID --env SHUFTI_REQUEST_LIMIT=$SHUFTI_REQUEST_LIMIT -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:production-${{ github.sha }}
+  # deploy:
+  #  needs: build
+  #  runs-on: whale-replacement
+  #  steps:
+  #   - name: Deploying OpenKYC for Production
+  #     run: docker pull jimber/openkyc:production-${{ github.sha }}
+  #   - name: Killing old docker
+  #     run: docker rm -f openkyc
+  #   - name: Start Docker with env vars
+  #     run: docker run -d -it --restart=unless-stopped --name=openkyc --network=3proxynet --env URL=$URL --env SEED=$SEED --env PASSWORD=$PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID --env SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID --env SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID --env SHUFTI_REQUEST_LIMIT=$SHUFTI_REQUEST_LIMIT -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:production-${{ github.sha }}
+
+deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create kubeconfig
+        run: |
+          mkdir ${HOME}/.kube
+          echo ${{ secrets.KUBE_KEY }} | base64 --decode > ${HOME}/.kube/jimber-prod2.key
+          echo ${HOME}/.kube/jimber-prod2.key
+          echo ${{ secrets.KUBE_CRT }} | base64 --decode > ${HOME}/.kube/jimber-prod2.crt
+          echo ${HOME}/.kube/jimber-prod2.crt
+      - name: Setting context
+        run: |
+          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+          cat ${HOME}/.kube/config
+      - name: Upgrade production on cluster
+        run: helm upgrade openkyc helm_files -f helm_files/valuesProduction.yaml \
+        --set image.tag=production-${{ github.sha }} \
+        --set secrets.TWILIO_AUTH_TOKEN=${{secrets.TWILIO_AUTH_TOKEN}} \
+        --set secrets.TWILIO_ACCOUNT_SID=${{secrets.TWILIO_ACCOUNT_SID}} \
+        --set secrets.TWILIO_FROM_NUMBER=${{secrets.TWILIO_FROM_NUMBER}} \
+        --set secrets.PASSWORD=${{secrets.PASSWORD}} \
+        --set secrets.SEED=${{secrets.SEED}} \
+        --set secrets.MESSAGING_SERVICE_SID=${{secrets.MESSAGING_SERVICE_SID}} \
+        --set secrets.SHUFTI_CLIENT_ID=${{secrets.SHUFTI_CLIENT_ID}} \
+        --set secrets.SHUFTI_SECRET_ID=${{secrets.SHUFTI_SECRET_ID}} \
+         -n jimber

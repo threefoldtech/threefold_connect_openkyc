@@ -1,0 +1,21 @@
+# Default values for 3botlogin.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+environment: testing
+replicaCount: 1
+
+
+
+image:
+        tag: testing-v2.0.0-test2 
+
+
+ingress:
+        # Used to create an Ingress record.
+        hosts:
+                - name: openkyc-helm-testing.jimbertesting.be
+                  service: openkyc-testing
+                  path: /
+                  port: 80

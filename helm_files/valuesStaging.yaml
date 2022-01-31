@@ -1,0 +1,17 @@
+
+environment: staging
+replicaCount: 1
+
+
+
+image:
+        tag: staging-a1e3dc59574b1c6e0ff7d7dbc7e557b39e2e7fae
+
+
+ingress:
+        # Used to create an Ingress record.
+        hosts:
+                - name: openkyc-helm-staging.jimbertesting.be
+                  service: openkyc-staging
+                  path: /
+                  port: 80
