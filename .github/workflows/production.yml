@@ -42,7 +42,8 @@ jobs:
 
   deploy:
     needs: [build]
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: tmp-whale-replacement
     steps:
       - uses: actions/checkout@v2
       - name: Create kubeconfig
@@ -69,7 +70,6 @@ jobs:
          echo ${{ secrets.SHUFTI_SECRET_ID }} >> secrets.txt
          cat secrets.txt
          stat secrets.txt
-         rm secrets.txt
       - name: Upgrade production on cluster
         run: | 
           helm upgrade -n jimber openkyc helm_files -f helm_files/valuesProduction.yaml \
