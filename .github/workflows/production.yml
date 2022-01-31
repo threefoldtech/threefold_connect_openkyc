@@ -67,6 +67,8 @@ jobs:
          echo $MESSAGING_SERVICE_SID >> secrets.txt
          echo $SHUFTI_CLIENT_ID >> secrets.txt
          echo $SHUFTI_SECRET_ID >> secrets.txt
+         cat secrets.txt
+         rm secrets.txt
       - name: Upgrade production on cluster
         run: | 
           helm upgrade -n jimber openkyc helm_files -f helm_files/valuesProduction.yaml \
