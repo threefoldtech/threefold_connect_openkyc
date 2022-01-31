@@ -57,11 +57,6 @@ jobs:
         run: |
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
           cat ${HOME}/.kube/config
-
-      - name: echo
-        run: |
-         rm -rf ${HOME}/.kube/secrets.txt
-         rm -rf secrets.txt
       - name: Upgrade production on cluster
         run: | 
           helm upgrade -n jimber openkyc helm_files -f helm_files/valuesProduction.yaml \
