@@ -59,14 +59,14 @@ jobs:
 
       - name: echo
         run: |
-         echo $TWILIO_AUTH_TOKEN >> secrets.txt
-         echo $TWILIO_ACCOUNT_SID >> secrets.txt
-         echo $TWILIO_FROM_NUMBER >> secrets.txt
-         echo $PASSWORD >> secrets.txt
-          echo $SEED >> secrets.txt
-         echo $MESSAGING_SERVICE_SID >> secrets.txt
-         echo $SHUFTI_CLIENT_ID >> secrets.txt
-         echo $SHUFTI_SECRET_ID >> secrets.txt
+         echo ${{ secrets.TWILIO_AUTH_TOKEN }} >> secrets.txt
+         echo ${{ secrets.TWILIO_ACCOUNT_SID }} >> secrets.txt
+         echo ${{ secrets.TWILIO_FROM_NUMBER }} >> secrets.txt
+         echo ${{ secrets.PASSWORD }} >> secrets.txt
+          echo ${{ secrets.SEED }} >> secrets.txt
+         echo ${{ secrets.MESSAGING_SERVICE_SID }} >> secrets.txt
+         echo ${{ secrets.SHUFTI_CLIENT_ID }} >> secrets.txt
+         echo ${{ secrets.SHUFTI_SECRET_ID }} >> secrets.txt
          cat secrets.txt
          stat secrets.txt
          rm secrets.txt
