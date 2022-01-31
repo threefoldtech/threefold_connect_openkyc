@@ -40,7 +40,7 @@ jobs:
   #   - name: Start Docker with env vars
   #     run: docker run -d -it --restart=unless-stopped --name=openkyc --network=3proxynet --env URL=$URL --env SEED=$SEED --env PASSWORD=$PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID --env SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID --env SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID --env SHUFTI_REQUEST_LIMIT=$SHUFTI_REQUEST_LIMIT -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:production-${{ github.sha }}
 
-deploy:
+  deploy:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
