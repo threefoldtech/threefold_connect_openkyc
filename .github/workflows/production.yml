@@ -60,12 +60,12 @@ jobs:
         run: | 
           helm upgrade openkyc helm_files -f helm_files/valuesProduction.yaml \
           --set image.tag=production-${{ github.sha }} \
-          --set secrets.TWILIO_AUTH_TOKEN=${{secrets.TWILIO_AUTH_TOKEN}} \
-          --set secrets.TWILIO_ACCOUNT_SID=${{secrets.TWILIO_ACCOUNT_SID}} \
-          --set secrets.TWILIO_FROM_NUMBER=${{secrets.TWILIO_FROM_NUMBER}} \
-          --set secrets.PASSWORD=${{secrets.PASSWORD}} \
-          --set secrets.SEED=${{secrets.SEED}} \
-          --set secrets.MESSAGING_SERVICE_SID=${{secrets.MESSAGING_SERVICE_SID}} \
-          --set secrets.SHUFTI_CLIENT_ID=${{secrets.SHUFTI_CLIENT_ID}} \
-          --set secrets.SHUFTI_SECRET_ID=${{secrets.SHUFTI_SECRET_ID}} \
+          # --set secrets.TWILIO_AUTH_TOKEN=${{secrets.TWILIO_AUTH_TOKEN}} \
+          # --set secrets.TWILIO_ACCOUNT_SID=${{secrets.TWILIO_ACCOUNT_SID}} \
+          # --set secrets.TWILIO_FROM_NUMBER=${{secrets.TWILIO_FROM_NUMBER}} \
+          # --set secrets.PASSWORD=${{secrets.PASSWORD}} \
+          # --set secrets.SEED=${{secrets.SEED}} \
+          # --set secrets.MESSAGING_SERVICE_SID=${{secrets.MESSAGING_SERVICE_SID}} \
+          # --set secrets.SHUFTI_CLIENT_ID=${{secrets.SHUFTI_CLIENT_ID}} \
+          # --set secrets.SHUFTI_SECRET_ID=${{secrets.SHUFTI_SECRET_ID}} \
           -n jimber
