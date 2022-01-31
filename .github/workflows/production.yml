@@ -74,8 +74,8 @@ jobs:
         run: | 
           helm upgrade -n jimber --dry-run --debug openkyc helm_files -f helm_files/valuesProduction.yaml \
           --set image.tag=production-${{ github.sha }} \
-          --set secrets.TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN 
-          # --set secrets.TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
+          --set secrets.TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
+          --set secrets.TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID 
           # --set secrets.TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER \
           # --set secrets.PASSWORD=$PASSWORD \
           # --set secrets.SEED=$SEED \
