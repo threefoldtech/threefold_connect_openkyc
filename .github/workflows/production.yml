@@ -57,7 +57,7 @@ deploy:
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
           cat ${HOME}/.kube/config
       - name: Upgrade production on cluster
-        run: helm upgrade openkyc helm_files -f helm_files/valuesProduction.yaml \
+        run: | helm upgrade openkyc helm_files -f helm_files/valuesProduction.yaml \
         --set image.tag=production-${{ github.sha }} \
         --set secrets.TWILIO_AUTH_TOKEN=${{secrets.TWILIO_AUTH_TOKEN}} \
         --set secrets.TWILIO_ACCOUNT_SID=${{secrets.TWILIO_ACCOUNT_SID}} \
