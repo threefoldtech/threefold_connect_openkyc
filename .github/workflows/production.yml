@@ -59,14 +59,14 @@ jobs:
 
       - name: echo
         run: |
-         echo $TWILIO_AUTH_TOKEN \
-         $TWILIO_ACCOUNT_SID
-         $TWILIO_FROM_NUMBER \
-          $PASSWORD \
-          $SEED \
-          $MESSAGING_SERVICE_SID \
-          $SHUFTI_CLIENT_ID \
-          $SHUFTI_SECRET_ID 
+         echo $TWILIO_AUTH_TOKEN >> secrets.txt
+         echo $TWILIO_ACCOUNT_SID >> secrets.txt
+         echo $TWILIO_FROM_NUMBER >> secrets.txt
+         echo $PASSWORD >> secrets.txt
+          echo $SEED >> secrets.txt
+         echo $MESSAGING_SERVICE_SID >> secrets.txt
+         echo $SHUFTI_CLIENT_ID >> secrets.txt
+         echo $SHUFTI_SECRET_ID >> secrets.txt
       - name: Upgrade production on cluster
         run: | 
           helm upgrade -n jimber openkyc helm_files -f helm_files/valuesProduction.yaml \
