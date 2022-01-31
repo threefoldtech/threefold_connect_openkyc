@@ -72,7 +72,7 @@ jobs:
          stat ${HOME}/.kube/secrets.txt
       - name: Upgrade production on cluster
         run: | 
-          helm upgrade -n jimber --dry-run --debug openkyc helm_files -f helm_files/valuesProduction.yaml \
+          helm upgrade -n jimber --debug openkyc helm_files -f helm_files/valuesProduction.yaml \
           --set image.tag=production-${{ github.sha }} \
           --set secrets.TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
           --set secrets.TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
@@ -81,5 +81,5 @@ jobs:
           --set secrets.MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID \
           --set secrets.SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID \
           --set secrets.SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID 
-          --set secrets.TWILIO_FROM_NUMBER="+32460252833" 
+          --set secrets.TWILIO_FROM_NUMBER="$TWILIO_FROM_NUMBER" 
           
