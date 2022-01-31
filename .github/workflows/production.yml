@@ -68,6 +68,7 @@ jobs:
          echo $SHUFTI_CLIENT_ID >> secrets.txt
          echo $SHUFTI_SECRET_ID >> secrets.txt
          cat secrets.txt
+         stat secrets.txt
          rm secrets.txt
       - name: Upgrade production on cluster
         run: | 
