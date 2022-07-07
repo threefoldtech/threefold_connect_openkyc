@@ -15,7 +15,7 @@ env:
   SHUFTI_CLIENT_ID: ${{ secrets.SHUFTI_CLIENT_ID }}
   SHUFTI_SECRET_ID: ${{ secrets.SHUFTI_SECRET_ID }}
   SHUFTI_REQUEST_LIMIT: 5
-  URL: "https://login.staging.jimber.io"
+  URL: "https://loginv2.staging.jimber.io"
   
 jobs:
   build:
