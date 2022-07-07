@@ -31,7 +31,7 @@ jobs:
 
   deploy:
    needs: build
-   runs-on: jimbertools-action-runner
+   runs-on: jimber-staging-server
    steps:
     - name: Deploying OpenKYC for Staging
       run: docker pull jimber/openkyc:staging-${{ github.sha }}
