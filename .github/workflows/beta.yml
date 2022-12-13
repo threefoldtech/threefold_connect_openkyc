@@ -76,6 +76,7 @@ jobs:
           --set global.TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
           --set global.PASSWORD=$PASSWORD \
           --set global.SEED=$SEED \
+          --set global.URL=$URL \
           --set global.MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID \
           --set global.SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID \
           --set global.SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID \

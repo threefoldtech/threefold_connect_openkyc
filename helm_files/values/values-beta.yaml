@@ -11,7 +11,7 @@ global:
   SHUFTI_CLIENT_ID: ""
   SHUFTI_SECRET_ID: ""
   TWILIO_FROM_NUMBER: ""
-
+  URL: ""
 
 ingress:
   hosts:
