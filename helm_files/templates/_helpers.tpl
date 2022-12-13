@@ -1,8 +1,3 @@
-
-{{- define "image" -}}
-{{ .Values.image.repo}}:{{.Values.image.tag }}
-{{- end -}}
-
 {{- define "releaseName" -}}
-{{ $.Chart.Name}}-{{.Values.environment }}
+{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

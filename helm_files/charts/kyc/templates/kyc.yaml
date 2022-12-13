@@ -13,26 +13,24 @@ spec:
         app: {{ template "releaseName" . }}
     spec:
       containers:
-        - name: {{ .Values.image.name }}
-          image: {{ template "image" . }} 
+        - name: {{ include "kyc.FULL_NAME" . }}
+          image: {{ include "kyc.IMAGE" . }}
           env:
-            {{- range $key, $val := .Values.secrets }}
+            {{- range $key, $val := .Values.global }}
             - name: {{ $key}}
               valueFrom:
                 secretKeyRef:
                   name: {{ template "releaseName" $ }}
                   key: {{ $key }}
-                {{- end}} 
+                {{- end}}
           command: ["/bin/sh","-c"]
-          #
           args: [" ln -sfn persistantVolume/pythonsqlite.db /pythonsqlite.db  && gunicorn3 -w 1 -b 0.0.0.0:5005 kyc:app"]
           volumeMounts:
-            - mountPath: /persistantVolume/
+            - mountPath: /persistentVolume/
               name: {{ template "releaseName" . }}
-      # restartPolicy: Always
       volumes:
         - name: {{ template "releaseName" . }}
           persistentVolumeClaim:
             claimName: {{ .Values.psvClaim.name }}
-      
+
 

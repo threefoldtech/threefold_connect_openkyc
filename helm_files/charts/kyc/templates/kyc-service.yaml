@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: {{ include "kyc.FULL_NAME" . }}
+  name: {{ include "kyc.FULL_NAME" . }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - protocol: "TCP"
+      port: {{ .Values.service.port }}
+      targetPort: 80
+  selector:
+    app: {{ include "kyc.FULL_NAME" . }}
