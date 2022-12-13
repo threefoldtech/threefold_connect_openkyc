@@ -9,5 +9,5 @@ spec:
     {{- end }}
   secretName: {{ template "releaseName" . }}
   issuerRef:
-    name: {{ template "releaseName" . }}-cert-manager
+    name: {{ template "releaseName" . }}-cert
     kind: Issuer
