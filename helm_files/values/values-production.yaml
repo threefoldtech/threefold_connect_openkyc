@@ -16,6 +16,6 @@ global:
 ingress:
   hosts:
     - name: openkyc.live
-      service: production-openkyc
+      service: production-openkyc-openkyc
       path: /
       port: 80
