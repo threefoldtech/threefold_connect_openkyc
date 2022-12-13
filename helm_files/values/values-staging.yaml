@@ -16,6 +16,6 @@ global:
 ingress:
   hosts:
     - name: openkyc-staging.jimbertesting.be
-      service: openkyc
+      service: staging-openkyc
       path: /
       port: 80
