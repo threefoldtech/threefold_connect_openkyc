@@ -64,9 +64,9 @@ jobs:
       - name: Create kubeconfig
         run: |
           mkdir ${HOME}/.kube
-          echo ${{ secrets.BETA_KUBE_KEY }} | base64 --decode > ${HOME}/.kube/jimber-staging.key
-          echo ${{ secrets.BETA_KUBE_CRT }} | base64 --decode > ${HOME}/.kube/jimber-staging.crt
-          echo ${{ secrets.BETA_KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+          echo ${{ secrets.STAGING_KUBE_KEY }} | base64 --decode > ${HOME}/.kube/jimber-staging.key
+          echo ${{ secrets.STAGING_KUBE_CRT }} | base64 --decode > ${HOME}/.kube/jimber-staging.crt
+          echo ${{ secrets.STAGING_KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
           echo $(ls ${HOME}/.kube)
       - name: Upgrade staging on cluster
         run: |
