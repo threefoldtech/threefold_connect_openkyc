@@ -24,7 +24,7 @@ spec:
                   key: {{ $key }}
                 {{- end}}
           command: ["/bin/sh","-c"]
-          args: [" ln -sfn persistantVolume/pythonsqlite.db /pythonsqlite.db  && gunicorn3 -w 1 -b 0.0.0.0:5005 kyc:app"]
+          args: [" ln -sfn persistentVolume/pythonsqlite.db /pythonsqlite.db  && gunicorn3 -w 1 -b 0.0.0.0:5005 kyc:app"]
           volumeMounts:
             - mountPath: /persistentVolume/
               name: {{ template "releaseName" . }}
