@@ -71,7 +71,7 @@ jobs:
       - name: Upgrade beta on cluster
         run: |
           helm upgrade --install -n jimber beta-openkyc helm_files -f helm_files/values/values-beta.yaml \
-          --set global.IMAGE=threefoldjimber/openkyc:beta-${{ github.sha }} \
+          --set global.KYC_IMAGE=threefoldjimber/openkyc:beta-${{ github.sha }} \
           --set global.TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
           --set global.TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
           --set global.PASSWORD=$PASSWORD \
