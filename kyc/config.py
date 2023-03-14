@@ -1,6 +1,6 @@
 import os
 
-EMAIL_ADDRESS = "info@openkyc.live"
+EMAIL_ADDRESS = "tfconnect@threefold.io"
 HEX_SEED = os.environ['SEED']
 PASSWORD =  os.environ['PASSWORD']
 SUBJECT = "Verify your email address"
