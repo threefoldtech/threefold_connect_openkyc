@@ -18,7 +18,7 @@ storage:
   hostpath: "/opt/openkyc/"
 
 psvClaim:
-  name: openkyc-pvc
+  name: openkyc-pvc-2
   accessModes: ReadWriteOnce
   storage: 100Mi
 
