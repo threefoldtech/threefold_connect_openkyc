@@ -69,6 +69,7 @@ def verify_email_handler():
 
         logger.debug("Sending email to %s ..." % email)
         send_email(email, html)
+        logger.debug("Email sent to %s ..." % email)
         print("verification_code")
         print(verification_code)
 
