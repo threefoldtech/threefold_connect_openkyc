@@ -4,6 +4,9 @@ metadata:
   labels:
     app: {{ template "releaseName" . }}
   name: {{ .Values.psvClaim.name }}
+  namespace: jimber
+  annotations:
+  helm.sh/resource-policy: "keep"
 spec:
   storageClassName: rook-cephfs
   accessModes:
