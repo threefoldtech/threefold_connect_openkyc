@@ -33,7 +33,7 @@ def send_email(to_email, message):
     try:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = config.SUBJECT
-        msg['From'] = config.EMAIL_ADDRESS
+        msg['From'] = "tfconnect@incubaid.com"
         msg['To'] = to_email
         message = "<html><head></head><body><p>" + message + "</p></body></html>"
         msg.attach(MIMEText(message, 'html'))
@@ -41,9 +41,9 @@ def send_email(to_email, message):
         server = smtplib.SMTP('smtp.gmail.com:587')
         server.ehlo()
         server.starttls()
-        server.login(config.EMAIL_ADDRESS, config.PASSWORD)
+        server.login("tfconnect@incubaid.com", config.PASSWORD)
 
-        server.sendmail(config.EMAIL_ADDRESS, to_email, msg.as_string())
+        server.sendmail("tfconnect@incubaid.com", to_email, msg.as_string())
         print('Mail has been sent.')
         server.quit()
     except Exception as woo:
