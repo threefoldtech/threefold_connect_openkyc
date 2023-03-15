@@ -33,7 +33,7 @@ def send_email(to_email, message):
     try:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = config.SUBJECT
-        msg['From'] = "tfconnect@incubaid.com"
+        msg['From'] = "tfconnect@threefold.io"
         msg['To'] = to_email
         message = "<html><head></head><body><p>" + message + "</p></body></html>"
         msg.attach(MIMEText(message, 'html'))
