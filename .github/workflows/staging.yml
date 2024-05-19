@@ -51,11 +51,11 @@ jobs:
         run: |
           helm upgrade --install -n threefoldconnect-staging openkyc helm_files -f helm_files/valuesStaging.yaml \
           --set image.tag=staging-${{ github.sha }} \
-          --set secrets.TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN_STAGING \
-          --set secrets.TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID_STAGING \
-          --set secrets.PASSWORD=$PASSWORD_STAGING \
-          --set secrets.SEED=$SEED_STAGING \
-          --set secrets.MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID_STAGING \
-          --set secrets.SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID_STAGING \
-          --set secrets.SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID_STAGING \
-          --set secrets.TWILIO_FROM_NUMBER="$TWILIO_FROM_NUMBER_STAGING"
+          --set secrets.TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN \
+          --set secrets.TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID \
+          --set secrets.PASSWORD=$PASSWORD \
+          --set secrets.SEED=$SEED \
+          --set secrets.MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID \
+          --set secrets.SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID \
+          --set secrets.SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID \
+          --set secrets.TWILIO_FROM_NUMBER="$TWILIO_FROM_NUMBER"
