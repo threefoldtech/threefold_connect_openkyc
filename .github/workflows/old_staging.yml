@@ -1,0 +1,41 @@
+name: staging
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+"
+
+env:
+  SEED: ${{ secrets.SEED }}
+  PASSWORD: ${{ secrets.PASSWORD }}
+  TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN_STAGING }}
+  TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID_STAGING }}
+  TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER_STAGING }}
+  MESSAGING_SERVICE_SID: ${{ secrets.MESSAGING_SERVICE_SID }}
+  SHUFTI_CLIENT_ID: ${{ secrets.SHUFTI_CLIENT_ID }}
+  SHUFTI_SECRET_ID: ${{ secrets.SHUFTI_SECRET_ID }}
+  SHUFTI_REQUEST_LIMIT: 5
+  URL: "https://login.staging.jimber.io"
+  
+jobs:
+  build:
+    runs-on: jimber-staging-server
+    steps:
+      - uses: actions/checkout@v2
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      - name: Building OpenKYC for Staging
+        run: docker build . -t jimber/openkyc:staging-${{ github.sha }}
+      - name: Push image to Docker Hub
+        run: docker push jimber/openkyc:staging-${{ github.sha }}
+
+  deploy:
+   needs: build
+   runs-on: jimbertools-action-runner
+   steps:
+    - name: Deploying OpenKYC for Staging
+      run: docker pull jimber/openkyc:staging-${{ github.sha }}
+    - name: Killing old docker
+      run: docker rm -f openkyc
+    - name: Start Docker with env vars
+      run: docker run -d -it --restart=unless-stopped --name=openkyc --network=proxy --env URL=$URL --env SEED=$SEED --env PASSWORD=$PASSWORD --env TWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN --env TWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID --env TWILIO_FROM_NUMBER=$TWILIO_FROM_NUMBER --env MESSAGING_SERVICE_SID=$MESSAGING_SERVICE_SID --env SHUFTI_CLIENT_ID=$SHUFTI_CLIENT_ID --env SHUFTI_SECRET_ID=$SHUFTI_SECRET_ID --env SHUFTI_REQUEST_LIMIT=$SHUFTI_REQUEST_LIMIT -v /opt/openkyc/pythonsqlite.db:/pythonsqlite.db jimber/openkyc:staging-${{ github.sha }}
