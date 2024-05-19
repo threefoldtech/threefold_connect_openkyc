@@ -38,14 +38,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Create kubeconfig
         run: |
-          mkdir ${HOME}/.kube
-          echo ${{ secrets.TF_KUBE_KEY }} | base64 --decode > ${HOME}/.kube/hagrid-prod2.key
-          echo ${HOME}/.kube/hagrid-prod2.key
-          echo ${{ secrets.TF_KUBE_CRT }} | base64 --decode > ${HOME}/.kube/hagrid-prod2.crt
-          echo ${HOME}/.kube/hagrid-prod2.crt
-      - name: Setting context
-        run: |
-          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+          echo ${{ secrets.TF_KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
           cat ${HOME}/.kube/config
       - name: Upgrade staging on cluster
         run: |
