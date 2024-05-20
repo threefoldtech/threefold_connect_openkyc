@@ -5,7 +5,9 @@ replicaCount: 1
 
 
 image:
-        tag: staging-a1e3dc59574b1c6e0ff7d7dbc7e557b39e2e7fae
+  name: openkyc
+  repository: threefolddev/openkyc
+  tag: staging-a1e3dc59574b1c6e0ff7d7dbc7e557b39e2e7fae
 
 
 ingress:
