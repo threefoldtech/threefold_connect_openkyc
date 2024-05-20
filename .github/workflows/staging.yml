@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Create kubeconfig
         run: |
-          echo ${{ secrets.TF_KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+          echo ${{ secrets.TF_KUBE_CONFIG }}  > ${HOME}/.kube/config
           cat ${HOME}/.kube/config
       - name: Upgrade staging on cluster
         run: |
