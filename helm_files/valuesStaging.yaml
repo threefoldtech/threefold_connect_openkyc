@@ -11,7 +11,19 @@ image:
 ingress:
         # Used to create an Ingress record.
         hosts:
-                - name: openkyc-helm-staging.jimbertesting.be
+                - name: kyc.staging.threefold.me
                   service: openkyc-staging
                   path: /
                   port: 80
+
+storage:
+  type: local
+  className: openkyc-storage
+  size: 200Mi
+  accessModes: ReadWriteOnce
+  hostpath: "/storage/threefoldconnect-staging/openkyc"
+
+psvClaim:
+  name: openkyc-pvc
+  accessModes: ReadWriteOnce
+  storage: 100Mi
