@@ -1,0 +1,26 @@
+environment: staging
+replicaCount: 1
+
+image:
+  name: openkyc
+  repository: threefolddev/openkyc
+  tag: staging-2f68dd4e55b03eba5bf9173dd88e01599c5e778b
+
+ingress:
+  hosts:
+    - name: kyc.staging.threefold.me
+      service: openkyc-staging
+      path: /
+      port: 80
+
+storage:
+  type: local
+  className: openkyc-storage
+  size: 200Mi
+  accessModes: ReadWriteOnce
+  hostpath: "/storage/threefoldconnect-staging/openkyc"
+
+psvClaim:
+  name: openkyc-pvc
+  accessModes: ReadWriteOnce
+  storage: 100Mi
