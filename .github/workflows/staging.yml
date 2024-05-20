@@ -22,8 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Log into GitHub Container Registry
-        run: echo "${{ secrets.TFDOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.TFDOCKERHUB_PASSWORD }} --password-stdin
+      - name: Log into Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.TFDOCKERHUB_USERNAME }}
+          password: ${{ secrets.TFDOCKERHUB_PASSWORD }}
+
       - name: Building OpenKYC for Staging
         run: docker build . -t threefolddev/openkyc:staging-${{ github.sha }}
       - name: Push image to Docker Hub
