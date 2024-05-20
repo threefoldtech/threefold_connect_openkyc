@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: {{ .Values.image.name }}
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        image: {{ template "image" . }}
+        #image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         env:
           {{- range $key, $val := .Values.secrets }}
           - name: {{ $key }}
