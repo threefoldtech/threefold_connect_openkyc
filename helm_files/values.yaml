@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
         name: openkyc
-        repo: jimber/openkyc
+        repo: threefolddev/openkyc
 
 service:
         port: 80
