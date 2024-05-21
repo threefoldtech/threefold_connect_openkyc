@@ -44,7 +44,6 @@ jobs:
         run: |
           mkdir ${HOME}/.kube
           echo ${{ secrets.TF_KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
-          cat ${HOME}/.kube/config
       - name: Upgrade staging on cluster
         run: |
           helm upgrade --install -n threefoldconnect-staging openkyc helm_files -f helm_files/valuesStaging.yaml \
