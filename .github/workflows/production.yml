@@ -56,7 +56,6 @@ jobs:
       - name: Setting context
         run: |
           echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
-          cat ${HOME}/.kube/config
       - name: Upgrade production on cluster
         run: | 
           helm upgrade -n jimber openkyc helm_files -f helm_files/valuesProduction.yaml \
