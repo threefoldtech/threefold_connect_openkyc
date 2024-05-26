@@ -16,3 +16,7 @@ ingress:
                   service: openkyc-prod
                   path: /
                   port: 80
+                - name: openkyc.threefold.me
+                  service: openkyc-prod
+                  path: /
+                  port: 80
