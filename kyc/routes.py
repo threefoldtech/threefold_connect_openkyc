@@ -263,7 +263,7 @@ def get_verification_code_for_identity():
             db.insert_identity_user(conn, user_id, verification_code, 0, public_key, "", "", "", "", "")
 
         else:
-            logger.debug("Updating using verficiation code, because we already have an entry.")
+            logger.debug("Updating using verification code, because we already have an entry.")
             db.update_identity_user_verification_code(conn, user_id, verification_code)
 
         db.update_identity_user_verification_code(conn, user_id, verification_code)

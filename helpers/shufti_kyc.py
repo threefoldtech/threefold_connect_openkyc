@@ -1,4 +1,4 @@
-import base64, requests, json, hashlib
+import base64, requests, json
 import logging
 import os
 
@@ -16,18 +16,9 @@ def get_shufti_access_token():
     response = requests.post(url,
                              headers={"Authorization": "Basic %s" % b64Val, "Content-Type": "application/json"})
 
-    # Calculating signature for verification
-    calculated_signature = hashlib.sha256('{}{}'.format(response.content.decode(), secret_key).encode()).hexdigest()
-
     # Convert json string to json object
     json_response = json.loads(response.content)
-    sp_signature = response.headers.get('Signature', '')
-
-    if sp_signature == calculated_signature:
-        return json_response
-    else:
-        print('Invalid Signature: {}'.format(json_response))
-        return
+    return json_response
 
 
 def get_shufti_data_by_reference(reference):
@@ -47,18 +38,9 @@ def get_shufti_data_by_reference(reference):
                              headers={"Authorization": "Basic %s" % b64Val, "Content-Type": "application/json"},
                              data=json.dumps(status_request))
 
-    # Calculating signature for verification
-    # calculated signature functionality cannot be implement in case of access token
-    calculated_signature = hashlib.sha256('{}{}'.format(response.content.decode(), secret_key).encode()).hexdigest()
-
     # Convert json string to json object
     json_response = json.loads(response.content)
-    sp_signature = response.headers.get('Signature', '')
-
-    if sp_signature == calculated_signature:
-        return json_response
-
-    print('Invalid Signature: {}'.format(json_response))
+    return json_response
 
 
 def delete_shufti_data_by_reference(reference):
@@ -77,18 +59,9 @@ def delete_shufti_data_by_reference(reference):
                              headers={"Authorization": "Basic %s" % b64Val, "Content-Type": "application/json"},
                              data=json.dumps(delete_request))
 
-    # Calculating signature for verification
-    # calculated signature functionality cannot be implement in case of access token
-    calculated_signature = hashlib.sha256('{}{}'.format(response.content.decode(), secret_key).encode()).hexdigest()
-
     # Convert json string to json object
     json_response = json.loads(response.content)
-    sp_signature = response.headers.get('Signature', '')
-
-    if sp_signature == calculated_signature:
-        return json_response
-
-    print('Invalid Signature: {}'.format(json_response))
+    return json_response
 
 
 def extract_data_from_callback(shufti_data):
