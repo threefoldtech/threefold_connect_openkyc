@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-        name: {{ template "releaseName" .}}
+  name: {{ template "releaseName" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -13,26 +13,23 @@ spec:
         app: {{ template "releaseName" . }}
     spec:
       containers:
-        - name: {{ .Values.image.name }}
-          image: {{ template "image" . }} 
-          env:
-            {{- range $key, $val := .Values.secrets }}
-            - name: {{ $key}}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "releaseName" $ }}
-                  key: {{ $key }}
-                {{- end}} 
-          command: ["/bin/sh","-c"]
-          #
-          args: [" ln -sfn persistantVolume/pythonsqlite.db /pythonsqlite.db  && gunicorn3 -w 1 -b 0.0.0.0:5005 kyc:app"]
-          volumeMounts:
-            - mountPath: /persistantVolume/
-              name: {{ template "releaseName" . }}
-      # restartPolicy: Always
+      - name: {{ .Values.image.name }}
+        image: {{ template "image" . }}
+        #image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+          {{- range $key, $val := .Values.secrets }}
+          - name: {{ $key }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "releaseName" $ }}
+                key: {{ $key }}
+          {{- end }}
+        command: ["/bin/sh", "-c"]
+        args: ["ln -sfn /persistantVolume/pythonsqlite.db /pythonsqlite.db && gunicorn3 -w 1 -b 0.0.0.0:5005 kyc:app"]
+        volumeMounts:
+        - mountPath: /persistantVolume/
+          name: storage
       volumes:
-        - name: {{ template "releaseName" . }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.psvClaim.name }}
-      
-
+      - name: storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.psvClaim.name }}

@@ -1,22 +1,17 @@
-
 environment: staging
 replicaCount: 1
-
-
 
 image:
   name: openkyc
   repository: threefolddev/openkyc
-  tag: staging-a1e3dc59574b1c6e0ff7d7dbc7e557b39e2e7fae
-
+  tag: staging-2f68dd4e55b03eba5bf9173dd88e01599c5e778b
 
 ingress:
-        # Used to create an Ingress record.
-        hosts:
-                - name: kyc.staging.threefold.me
-                  service: openkyc-staging
-                  path: /
-                  port: 80
+  hosts:
+    - name: kyc.staging.threefold.me
+      service: openkyc-staging
+      path: /
+      port: 80
 
 storage:
   type: local
