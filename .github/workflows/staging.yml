@@ -16,7 +16,7 @@ env:
   SHUFTI_CLIENT_ID: ${{ secrets.SHUFTI_CLIENT_ID_STAGING }}
   SHUFTI_SECRET_ID: ${{ secrets.SHUFTI_SECRET_ID_STAGING }}
   SHUFTI_REQUEST_LIMIT: 5
-  URL: "https://login.threefold.me"
+  URL: "https://login.staging.threefold.me"
 
 jobs:
   build:
