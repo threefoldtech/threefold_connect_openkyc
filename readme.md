@@ -1,10 +1,10 @@
-# OpenKYC
+# Grid KYC OpenKYC
 
-OpenKYC is a Python Flask service that provides email and phone verification with cryptographically signed attestations. It enables downstream services to trust verified contact information without storing sensitive personal data.
+Grid KYC OpenKYC is a Python Flask service that provides email and phone verification with cryptographically signed attestations. It enables downstream services to trust verified contact information without storing sensitive personal data.
 
 ## What this is
 
-OpenKYC exposes RESTful endpoints for verifying user contact information. Users register with a user ID and email address or phone number, receive a verification code, and upon successful verification receive a cryptographically signed attestation. The service uses ed25519 signatures to produce tamper-proof attestations that other services can validate independently.
+Grid KYC OpenKYC exposes RESTful endpoints for verifying user contact information. Users register with a user ID and email address or phone number, receive a verification code, and upon successful verification receive a cryptographically signed attestation. The service uses ed25519 signatures to produce tamper-proof attestations that other services can validate independently.
 
 The service also integrates with Shufti Pro for advanced identity verification (KYC) workflows.
 
@@ -19,7 +19,7 @@ The service also integrates with Shufti Pro for advanced identity verification (
 
 ## Role in the stack
 
-OpenKYC functions as an identity verification microservice. It can be deployed alongside authentication services, user management systems, or any infrastructure that requires verified contact information. The signed attestations it produces can be consumed by other services without those services needing direct access to personal data.
+Grid KYC OpenKYC functions as an identity verification microservice. It can be deployed alongside authentication services, user management systems, or any infrastructure that requires verified contact information. The signed attestations it produces can be consumed by other services without those services needing direct access to personal data.
 
 ## Relation to ThreeFold
 
