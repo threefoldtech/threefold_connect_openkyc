@@ -1,22 +1,33 @@
-# ThreeFold Connect OpenKYC
+# OpenKYC
 
-OpenKYC is a Python Flask service for the ThreeFold Connect ecosystem that provides email and phone verification for user identities. It allows users to register with a user ID and email address or phone number, receive a verification code, and upon verification returns a cryptographically signed attestation of the verified contact information.
+OpenKYC is a Python Flask service that provides email and phone verification with cryptographically signed attestations. It enables downstream services to trust verified contact information without storing sensitive personal data.
 
-## Overview
+## What this is
 
-The service exposes RESTful endpoints for:
+OpenKYC exposes RESTful endpoints for verifying user contact information. Users register with a user ID and email address or phone number, receive a verification code, and upon successful verification receive a cryptographically signed attestation. The service uses ed25519 signatures to produce tamper-proof attestations that other services can validate independently.
 
-- **Email verification**: Sending verification emails and confirming email addresses
-- **Phone/SMS verification**: Sending verification SMS messages and confirming phone numbers
-- **KYC integration**: Integration with Shufti Pro for identity verification workflows
+The service also integrates with Shufti Pro for advanced identity verification (KYC) workflows.
 
-Verified data is signed using ed25519 cryptographic signatures, enabling downstream services to trust the attestation without storing sensitive personal data.
+## What this repository contains
 
-## Structure
+- `kyc/` — Flask application with route handlers, database models, and configuration
+- `helpers/` — Cryptographic signing utilities and Shufti Pro integration helpers
+- `openkyc.py` — Application entry point
+- `requirements.txt` — Python dependencies
+- `Dockerfile` — Container build definition
+- `helm_files/` — Kubernetes deployment manifests
 
-- `kyc/` – Flask application with route handlers, database models, and configuration
-- `helpers/` – Cryptographic signing utilities and Shufti Pro integration helpers
-- `openkyc.py` – Application entry point
+## Role in the stack
+
+OpenKYC functions as an identity verification microservice. It can be deployed alongside authentication services, user management systems, or any infrastructure that requires verified contact information. The signed attestations it produces can be consumed by other services without those services needing direct access to personal data.
+
+## Relation to ThreeFold
+
+This technology is used within the ThreeFold ecosystem and was first deployed on the ThreeFold Grid. The component itself is designed as reusable infrastructure technology and should be understood by its technical function first, independent of any specific deployment.
+
+## Ownership
+
+This repository is owned and maintained by TF-Tech NV, a Belgian company responsible for the development and maintenance of this technology.
 
 ## Development
 
@@ -41,5 +52,4 @@ gunicorn -b localhost:5005 -w 1 kyc:app
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-Copyright (c) TFTech NV.
+This project is licensed under the Apache License 2.0 — see the [LICENSE](LICENSE) file for details.
